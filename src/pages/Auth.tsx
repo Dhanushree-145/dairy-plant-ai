@@ -178,7 +178,7 @@ function AuthScreen({
     setFormError(null);
     try {
       const normalized = email.trim().toLowerCase();
-      await signIn("email-otp", { email: normalized, existingUserRequired: true });
+      await signIn("email-otp", { email: normalized });
       setPendingEmail(normalized);
       setPendingProfile(profile);
       setCode("");
@@ -346,27 +346,26 @@ function AuthScreen({
 
         <div className="flex flex-1 items-center justify-center px-5 pb-12 sm:px-8">
           <div className="w-full max-w-[440px]">
-            <div className="rounded-2xl border border-border/80 bg-card p-6 shadow-card sm:p-8">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
+            <div className="rounded-2xl border border-border/80 bg-card p-6 shadow-card sm:p-8">          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
                 {step === "code"
                   ? "Passwordless access"
                   : isSignup
-                    ? "Plant owner account"
+                    ? "Create your plant account"
                     : "Welcome back"}
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-navy">
                 {step === "code"
                   ? "Enter your email code"
                   : isSignup
-                    ? "Create your plant account"
-                    : "                Sign in to Dairy360"}
+                    ? "Create your plant account with the email id above"
+                    : "Sign in to Dairy360"}
               </h2>
               <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
                 {step === "code"
                   ? `We emailed a 6-digit code to ${pendingEmail}. It expires in 15 minutes.`
                   : isSignup
                     ? "No password needed. Tell us who runs the plant, then verify your email."
-                    : "Enter your email and we will send a one-time code. No password required."}
+                    : "Enter the email id you want to use for this Dairy360 account. We will send a one-time code to that address."}
               </p>
 
               {step === "code" ? (
@@ -514,8 +513,8 @@ function AuthScreen({
                   <div className="flex items-start gap-2 rounded-lg border border-primary/15 bg-primary/[0.04] px-3 py-2.5">
                     <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />
                     <p className="text-[11px] leading-relaxed text-navy/70">
-                      An email address that has not been used to create an account will be
-                      treated as invalid and show "Enter a valid email id".
+                      We will send a 6-digit code to the email you enter. If the email is already
+                      linked to a Dairy360 account, use the sign-in flow instead.
                     </p>
                   </div>
 
