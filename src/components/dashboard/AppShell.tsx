@@ -37,7 +37,7 @@ type NavItem = {
   name: string;
   icon: LucideIcon;
   available: boolean;
-  key?: "overview" | "production" | "energy" | "profit" | "reports";
+  key?: "overview" | "production" | "energy" | "hygiene" | "waste" | "profit" | "reports";
   to?: string;
 };
 
@@ -57,8 +57,20 @@ const NAV_ITEMS: NavItem[] = [
     key: "energy",
     to: "/dashboard/energy",
   },
-  { name: "Hygiene & Quality", icon: ShieldCheck, available: false },
-  { name: "Waste Management", icon: Recycle, available: false },
+  {
+    name: "Hygiene Management",
+    icon: ShieldCheck,
+    available: true,
+    key: "hygiene",
+    to: "/dashboard/hygiene",
+  },
+  {
+    name: "Waste Management",
+    icon: Recycle,
+    available: true,
+    key: "waste",
+    to: "/dashboard/waste",
+  },
   { name: "Inventory & Maintenance", icon: Boxes, available: false },
   {
     name: "Cost & Profit",
@@ -85,7 +97,7 @@ export function AppShell({
   children: ReactNode;
   plantName?: string;
   sectionLabel?: string;
-  activeKey?: "overview" | "production" | "energy" | "profit" | "reports";
+  activeKey?: "overview" | "production" | "energy" | "hygiene" | "waste" | "profit" | "reports";
 }) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -102,7 +114,7 @@ export function AppShell({
   const handleLockedModule = (name: string) => {
     setMobileOpen(false);
     toast("Module not in this build", {
-      description: `${name} is not available yet. Overview, Milk & Production, Energy, Cost & Profit and Reports are available now.`,
+      description: `${name} is not available yet. Overview, Milk & Production, Energy, Hygiene, Waste, Cost & Profit and Reports are available now.`,
       icon: <Sparkles className="size-4 text-primary" />,
     });
   };

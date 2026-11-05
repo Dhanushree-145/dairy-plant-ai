@@ -1930,6 +1930,21 @@ export const dashboard = query({
         offlineSensors: sensors.filter((sensor) => sensor.status === "offline").length,
       },
       categories,
+      attention: [...assets]
+        .filter((asset) =>
+          ["failed", "overdue", "verification_pending", "cleaning", "unknown"].includes(
+            asset.status,
+          ),
+        )
+        .sort((a, b) => {
+          const rank = { failed: 0, overdue: 1, verification_pending: 2, cleaning: 3, unknown: 4 };
+          return (
+            (rank[a.status as keyof typeof rank] ?? 5) -
+              (rank[b.status as keyof typeof rank] ?? 5) ||
+            (a.nextCleaningAt ?? 0) - (b.nextCleaningAt ?? 0)
+          );
+        })
+        .slice(0, 8),
       alerts: activeAlerts.slice(0, 8),
       alertSummary: {
         active: activeAlerts.length,
