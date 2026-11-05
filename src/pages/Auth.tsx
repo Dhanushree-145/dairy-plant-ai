@@ -30,7 +30,7 @@ import { Link, useNavigate, useSearchParams } from "react-router";
 import { useMutation } from "convex/react";
 import { z } from "zod";
 
-const REMEMBERED_EMAIL_KEY = "dairysense:remembered-email";
+const REMEMBERED_EMAIL_KEY = "dairy360:remembered-email";
 
 const emailSchema = z.object({
   email: z
@@ -88,6 +88,9 @@ function friendlyAuthError(error: unknown): string {
   }
   if (/invalid email/i.test(raw)) {
     return "Enter a valid email address.";
+  }
+  if (/user not found|no such account|account not found/i.test(raw)) {
+    return "That email address was not used to create an account. Please use a different email.";
   }
   if (/VLY_INTEGRATION|Could not send|sign-in code/i.test(raw)) {
     return "We could not send the code right now. Try again in a moment.";
@@ -175,7 +178,7 @@ function AuthScreen({
     setFormError(null);
     try {
       const normalized = email.trim().toLowerCase();
-      await signIn("email-otp", { email: normalized });
+      await signIn("email-otp", { email: normalized, existingUserRequired: true });
       setPendingEmail(normalized);
       setPendingProfile(profile);
       setCode("");
@@ -222,11 +225,10 @@ function AuthScreen({
     if (code.length !== 6 || isSubmitting) return;
     setIsSubmitting(true);
     setFormError(null);
-    try {
-      await signIn("email-otp", { email: pendingEmail, code });
-      await saveProfileIfNeeded();
-      rememberEmail(pendingEmail);
-      navigate(redirect, { replace: true });
+    try {        await signIn("email-otp", { email: pendingEmail, code });
+        await saveProfileIfNeeded();
+        rememberEmail(pendingEmail);
+        navigate(redirect, { replace: true });
     } catch (error) {
       setFormError(friendlyAuthError(error));
       setCode("");
@@ -512,8 +514,9 @@ function AuthScreen({
                   <div className="flex items-start gap-2 rounded-lg border border-primary/15 bg-primary/[0.04] px-3 py-2.5">
                     <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />
                     <p className="text-[11px] leading-relaxed text-navy/70">
-                      We email a 6-digit code to verify the address. There is no password
-                      to create, remember or reset.
+                      We email a 6-digit code to verify the address. If we do not have an
+                      account for this email, requesting the code will fail with "enter a valid
+                      email id".
                     </p>
                   </div>
 
