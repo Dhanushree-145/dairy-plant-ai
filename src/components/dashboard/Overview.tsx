@@ -175,7 +175,7 @@ export function Overview({
       </div>
 
       <p className="pt-1 text-center text-[10.5px] leading-relaxed text-muted-foreground">
-        DairySense keeps milk, production, energy, cost and profit tied to the same
+        Dairy360 keeps milk, production, energy, cost and profit tied to the same
         plant records. Figures shown are simulated for demonstration and are not
         live sensor readings.
       </p>

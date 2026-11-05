@@ -181,7 +181,7 @@ export function WasteSetup() {
               <div>
                 <h2 className="font-display text-[15px] font-semibold text-navy">Plant scope and waste streams</h2>
                 <p className="mt-0.5 text-[10.5px] leading-relaxed text-muted-foreground">
-                  DairySense tracks exactly these six streams. Recoverable cream, by-products and
+                  Dairy360 tracks exactly these six streams. Recoverable cream, by-products and
                   saleable product are not automatically classified as waste.
                 </p>
               </div>

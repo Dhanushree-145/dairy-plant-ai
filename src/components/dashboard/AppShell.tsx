@@ -353,7 +353,7 @@ export function AppShell({
         <footer className="border-t border-border/70 px-4 py-5 sm:px-6 lg:px-8 print:hidden">
           <div className="mx-auto flex max-w-[1440px] flex-col gap-2 text-[11px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
             <p>
-              DairySense · Milk, production, energy, cost and profit ·{" "}
+              Dairy360 · across milk, production, energy, cost and profit ·{" "}
               <span className="text-navy/70">Monitor → Detect → Optimize</span>
             </p>
             <p className="flex items-center gap-1.5">

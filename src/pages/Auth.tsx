@@ -327,7 +327,7 @@ function AuthScreen({
           </Link>
           <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
             <span className="hidden sm:inline">
-              {isSignup ? "Already have an account?" : "New to DairySense?"}
+              {isSignup ? "Already have an account?" : "        New to Dairy360?"}
             </span>
             <Button asChild variant="ghost" size="sm" className="text-primary">
               <Link
@@ -357,7 +357,7 @@ function AuthScreen({
                   ? "Enter your email code"
                   : isSignup
                     ? "Create your plant account"
-                    : "Sign in to DairySense"}
+                    : "                Sign in to Dairy360"}
               </h2>
               <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
                 {step === "code"

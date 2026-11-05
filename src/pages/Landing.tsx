@@ -274,7 +274,7 @@ export default function Landing() {
                 transition={{ duration: 0.6, delay: 0.12 }}
                 className="mt-5 max-w-xl text-[15px] leading-relaxed text-muted-foreground sm:text-base"
               >
-                DairySense gives you one owner's view of milk processed, products
+                Dairy360 gives you one owner's view of milk processed, products
                 made, energy burned and waste generated — then points at the
                 machines, batches and hygiene gaps quietly costing you money.
               </motion.p>
@@ -352,10 +352,7 @@ export default function Landing() {
             <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-navy sm:text-4xl">
               A control room, not another register.
             </h2>
-            <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
-              Most plant software stops at showing numbers. DairySense carries
-              the same record through three jobs so an owner can act before the
-              month closes.
+            <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">Most plant software stops at showing numbers. Dairy360 carries the same record through three jobs so an owner can act before the month closes.
             </p>
           </motion.div>
 

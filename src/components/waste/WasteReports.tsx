@@ -21,8 +21,8 @@ export function WasteReports({ data }: { data: WasteDashboardData }) {
   const filenameBase = `dairysense-waste-${data.rangeDays}d-${new Date().toISOString().slice(0, 10)}`;
 
   const exportSummary = () => {
-    downloadCsv(`${filenameBase}-summary.csv`, [
-      ["DairySense Waste Management report"],
+    downloadCsv(`${filenameBase}-summary.csv`, [          ["Dairy360 Waste Management report"],
+
       ["Generated", formatWasteTime(data.generatedAt)],
       ["Period", `${data.rangeDays} days`],
       ["Data source", "SIMULATED demo analytics plus recorded plant actions"],
@@ -239,7 +239,8 @@ export function WasteReports({ data }: { data: WasteDashboardData }) {
       </div>
 
       <div className="flex items-center justify-between rounded-lg border border-border/70 bg-background/50 px-3 py-2 text-[8.5px] text-muted-foreground">
-        <span>DairySense · Waste Management · {data.rangeDays}-day report</span>
+        <span>              Dairy360 · Waste Management
+ · {data.rangeDays}-day report</span>
         <span>Generated {formatWasteTime(data.generatedAt)}</span>
       </div>
     </div>

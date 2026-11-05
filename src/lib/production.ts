@@ -33,7 +33,7 @@ function csvCell(value: string | number): string {
 
 export function buildProductionCsv(data: ProductionData): string {
   const rows: Array<Array<string | number>> = [];
-  rows.push(["DairySense production and profit report"]);
+  rows.push(["Dairy360 production and profit report"]);
   rows.push(["Data source", data.dataSource]);
   rows.push(["Period", `${data.reports.period.from} to ${data.reports.period.to}`]);
   rows.push(["Generated", new Date(data.generatedAt).toISOString()]);

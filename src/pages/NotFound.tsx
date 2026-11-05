@@ -7,7 +7,7 @@ export default function NotFound() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center px-5 sm:px-8">
-        <Link to="/" aria-label="DairySense home">
+        <Link to="/" aria-label="Dairy360 home">
           <Brand />
         </Link>
       </div>
