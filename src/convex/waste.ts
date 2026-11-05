@@ -23,27 +23,6 @@ type WasteCategory =
 
 const DAY = 86_400_000;
 const LITRES_PER_DAY = 47_800;
-const DEFAULT_CATEGORIES: WasteCategory[] = [
-  "Milk waste",
-  "Wastewater",
-  "Packaging waste",
-  "Rejected product",
-  "Filtration residue",
-  "Chemical waste",
-];
-const DEFAULT_STAGES = [
-  "Raw milk reception",
-  "Milk sampling & testing",
-  "Chilling & storage",
-  "Filtration",
-  "Standardization",
-  "Pasteurization",
-  "Homogenization",
-  "Packaging",
-  "Cold storage",
-  "Cleaning & CIP",
-  "Wastewater treatment",
-];
 const DEMO_BATCHES = [
   { id: "B-2405", product: "Toned milk 500 ml", inputLitres: 52_000, outputKg: 49_800, recoverableKg: 860, inventoryChangeKg: 120 },
   { id: "B-2404", product: "Full cream 1 L", inputLitres: 38_500, outputKg: 36_600, recoverableKg: 710, inventoryChangeKg: -90 },
@@ -137,15 +116,6 @@ function monthLabel(timestamp: number): string {
     month: "short",
     year: "2-digit",
     timeZone: "UTC",
-  });
-}
-
-function timeLabel(timestamp: number): string {
-  return new Date(timestamp).toLocaleString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
   });
 }
 
@@ -950,6 +920,7 @@ export const dashboard = query({
       wastewater: number;
       packaging: number;
       rejected: number;
+      recorded: boolean;
     }>();
     for (let index = days - 1; index >= 0; index -= 1) {
       const timestamp = now - index * DAY;
@@ -962,6 +933,7 @@ export const dashboard = query({
         wastewater: round(sum(dayRecords, "Wastewater"), 0),
         packaging: round(sum(dayRecords, "Packaging waste"), 1),
         rejected: round(sum(dayRecords, "Rejected product"), 1),
+        recorded: dayRecords.length > 0,
       });
     }
     const daily = [...dateSeries.values()];
@@ -969,24 +941,40 @@ export const dashboard = query({
     const weekly = Array.from({ length: 12 }, (_, index) => {
       const end = now - (11 - index) * 7 * DAY;
       const start = end - 7 * DAY;
-      const total = records
-        .filter((record) => record.recordedAt >= start && record.recordedAt <= end)
-        .reduce((sum, record) => sum + kgEquivalent(record.category, record.quantity), 0);
-      return { label: dayLabel(start), total: round(total, 1) };
+      const period = records.filter(
+        (record) => record.recordedAt >= start && record.recordedAt <= end,
+      );
+      const total = period.reduce(
+        (sum, record) => sum + kgEquivalent(record.category, record.quantity),
+        0,
+      );
+      return {
+        label: dayLabel(start),
+        total: round(total, 1),
+        recorded: period.length > 0,
+      };
     });
     const monthly = Array.from({ length: 6 }, (_, index) => {
       const end = now - (5 - index) * 30 * DAY;
       const start = end - 30 * DAY;
-      const total = records
-        .filter((record) => record.recordedAt >= start && record.recordedAt <= end)
-        .reduce((sum, record) => sum + kgEquivalent(record.category, record.quantity), 0);
-      return { label: monthLabel(start), total: round(total, 1) };
+      const period = records.filter(
+        (record) => record.recordedAt >= start && record.recordedAt <= end,
+      );
+      const total = period.reduce(
+        (sum, record) => sum + kgEquivalent(record.category, record.quantity),
+        0,
+      );
+      return {
+        label: monthLabel(start),
+        total: round(total, 1),
+        recorded: period.length > 0,
+      };
     });
 
     const currentTotal = sumKg(periodRecords);
     const previousTotal = sumKg(previousRecords);
     const recycled = periodRecords
-      .filter((record) => ["Recycled", "Recovered", "Disposed", "Treated"].includes(record.disposalStatus))
+      .filter((record) => ["Recycled", "Recovered"].includes(record.disposalStatus))
       .reduce((total, record) => total + kgEquivalent(record.category, record.quantity), 0);
     const pendingDisposal = periodRecords.filter(
       (record) => record.disposalStatus === "Pending disposal",
@@ -1002,8 +990,10 @@ export const dashboard = query({
     const activeAlerts = alerts.filter((alert) => alert.status !== "resolved");
     const insights = buildInsights(configDoc, periodRecords, batches, now);
 
+    const recentDays = daily.slice(-7).filter((day) => day.recorded);
     const lastSevenAverage =
-      daily.slice(-7).reduce((total, day) => total + day.total, 0) / Math.max(1, daily.slice(-7).length);
+      recentDays.reduce((total, day) => total + day.total, 0) /
+      Math.max(1, recentDays.length);
     const forecast = Array.from({ length: 7 }, (_, index) => {
       const timestamp = now + (index + 1) * DAY;
       const factor = 1 + (noise(Math.floor(timestamp / DAY) + 301) - 0.5) * 0.12;
@@ -1112,6 +1102,7 @@ export const dashboard = query({
       batches,
       forecast: {
         days: forecast,
+        hasRecentData: recentDays.length > 0,
         predictedWeekKg: predictedWeek,
         predictedWeekCost: Math.round(
           predictedWeek * configDoc.costs.disposalPerKg,
@@ -1302,10 +1293,21 @@ export const addDisposal = mutation({
       }
     }
     const now = Date.now();
+    const normalizedMethod = method.toLowerCase();
+    const disposalStatus = normalizedMethod.includes("recycl")
+      ? "Recycled"
+      : normalizedMethod.includes("recover") ||
+          normalizedMethod.includes("biogas") ||
+          normalizedMethod.includes("feed") ||
+          normalizedMethod.includes("compost")
+        ? "Recovered"
+        : normalizedMethod.includes("treat")
+          ? "Treated"
+          : "Disposed";
     for (const record of records) {
       if (record) {
         await ctx.db.patch(record._id, {
-          disposalStatus: method.toLowerCase().includes("recycl") ? "Recycled" : "Disposed",
+          disposalStatus,
           recoveryMethod: method,
           updatedAt: now,
         });

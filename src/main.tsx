@@ -18,6 +18,10 @@ const Profit = lazy(() => import("./pages/Profit.tsx"));
 const Reports = lazy(() => import("./pages/Reports.tsx"));
 const Energy = lazy(() => import("./pages/Energy.tsx"));
 const MachineDetail = lazy(() => import("./pages/MachineDetail.tsx"));
+const Hygiene = lazy(() => import("./pages/Hygiene.tsx"));
+const HygieneCategory = lazy(() => import("./pages/HygieneCategory.tsx"));
+const HygieneAsset = lazy(() => import("./pages/HygieneAsset.tsx"));
+const Waste = lazy(() => import("./pages/Waste.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
 // Simple loading fallback for route transitions
@@ -167,6 +171,38 @@ createRoot(document.getElementById("root")!).render(
                 element={
                   <RequireAuth redirectImmediately>
                     <Reports />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/dashboard/hygiene"
+                element={
+                  <RequireAuth redirectImmediately>
+                    <Hygiene />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/dashboard/hygiene/category/:category"
+                element={
+                  <RequireAuth redirectImmediately>
+                    <HygieneCategory />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/dashboard/hygiene/asset/:assetKey"
+                element={
+                  <RequireAuth redirectImmediately>
+                    <HygieneAsset />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/dashboard/waste"
+                element={
+                  <RequireAuth redirectImmediately>
+                    <Waste />
                   </RequireAuth>
                 }
               />

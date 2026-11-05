@@ -32,7 +32,6 @@ import {
   HYGIENE_CATEGORIES,
   relativeHygieneTime,
   type HygieneCategoryData,
-  type HygieneCategoryKey,
 } from "@/lib/hygiene";
 import { cn } from "@/lib/utils";
 import { useMutation, useQuery } from "convex/react";
@@ -51,7 +50,7 @@ import {
   UserCheck,
   X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Link, useParams } from "react-router";
 import {
   Bar,
@@ -72,6 +71,9 @@ export default function HygieneCategory() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
+  const [selectedSample, setSelectedSample] = useState<
+    HygieneCategoryData["samples"][number] | null
+  >(null);
 
   const data = useQuery(
     api.hygiene.category,
@@ -400,6 +402,7 @@ export default function HygieneCategory() {
                     <th className="px-3 py-2 text-right font-semibold">Limit</th>
                     <th className="px-3 py-2 font-semibold">Interpretation</th>
                     <th className="px-3 py-2 font-semibold">Evidence</th>
+                    <th className="px-3 py-2 text-right font-semibold">QA</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -407,7 +410,9 @@ export default function HygieneCategory() {
                     <tr key={sample.key} className="border-b border-border/50 text-[10.5px] last:border-0">
                       <td className="px-3 py-2">
                         <p className="font-semibold text-navy">{sample.sampleId}</p>
-                        <p className="text-[9px] text-muted-foreground">{formatHygieneTime(sample.collectedAt)}</p>
+                        <p className="text-[9px] text-muted-foreground">
+                          {formatHygieneTime(now - sample.collectedAgoHours * 3_600_000)}
+                        </p>
                       </td>
                       <td className="px-3 py-2 text-muted-foreground">{sample.location}</td>
                       <td className="px-3 py-2 text-muted-foreground">{sample.testType}</td>
@@ -423,6 +428,18 @@ export default function HygieneCategory() {
                         <p className="mt-0.5 max-w-[230px] text-[9px] leading-relaxed text-muted-foreground">{sample.interpretation}</p>
                       </td>
                       <td className="px-3 py-2 text-muted-foreground">{sample.reportName}</td>
+                      <td className="px-3 py-2 text-right">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-6 px-2 text-[9px]"
+                          onClick={() => setSelectedSample(sample)}
+                        >
+                          {sample.reviewStatus === "pending_review" || sample.reviewStatus === "pending_sample"
+                            ? "Review"
+                            : "Update"}
+                        </Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -469,13 +486,126 @@ export default function HygieneCategory() {
         </div>
       </div>
 
-      <EmployeeInspectionDialog
-        employeeKey={selectedEmployee}
-        onClose={() => setSelectedEmployee(null)}
-        now={now}
-        categoryData={data}
-      />
+      {selectedEmployee && (
+        <EmployeeInspectionDialog
+          key={selectedEmployee}
+          employeeKey={selectedEmployee}
+          onClose={() => setSelectedEmployee(null)}
+          now={now}
+          categoryData={data}
+        />
+      )}
+      {selectedSample && (
+        <SampleReviewDialog
+          key={selectedSample.key}
+          sample={selectedSample}
+          onClose={() => setSelectedSample(null)}
+        />
+      )}
     </AppShell>
+  );
+}
+
+function SampleReviewDialog({
+  sample,
+  onClose,
+}: {
+  sample: HygieneCategoryData["samples"][number];
+  onClose: () => void;
+}) {
+  const reviewSample = useMutation(api.hygiene.reviewSample);
+  const initialStatus =
+    sample.reviewStatus === "satisfactory" || sample.reviewStatus === "unsatisfactory"
+      ? sample.reviewStatus
+      : "pending_review";
+  const [reviewStatus, setReviewStatus] = useState<"satisfactory" | "unsatisfactory" | "pending_review">(initialStatus);
+  const [interpretation, setInterpretation] = useState(sample.interpretation);
+  const [reviewer, setReviewer] = useState("Dr. A. Deshpande (QA)");
+  const [saving, setSaving] = useState(false);
+
+  const submit = async () => {
+    if (interpretation.trim().length < 3) {
+      toast.error("Record the QA interpretation.");
+      return;
+    }
+    setSaving(true);
+    try {
+      await reviewSample({
+        sampleKey: sample.key,
+        reviewStatus,
+        interpretation,
+        reviewer,
+      });
+      toast.success("Laboratory sample reviewed", {
+        description: `${sample.sampleId} · ${reviewStatus.replace(/_/g, " ")}.`,
+      });
+      onClose();
+    } catch (error) {
+      toast.error("Could not review sample", {
+        description: error instanceof Error ? error.message : String(error),
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open onOpenChange={(next) => !next && onClose()}>
+      <DialogContent className="max-h-[92vh] w-[calc(100vw-1.5rem)] max-w-md overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="font-display text-[16px] text-navy">
+            QA review · {sample.sampleId}
+          </DialogTitle>
+          <DialogDescription className="text-[11px]">
+            {sample.location} · {sample.parameter} {sample.reading} {sample.unit} against limit {sample.limit} {sample.unit}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div className="rounded-lg bg-background/60 p-2.5 text-[9.5px] leading-relaxed text-muted-foreground">
+            Report evidence: <span className="font-medium text-navy">{sample.reportName}</span>. An uploaded
+            report is evidence only — it is never automatically satisfactory.
+          </div>
+          <div className="grid gap-1.5">
+            {([
+              ["satisfactory", "Satisfactory", "border-success/40 bg-success/10 text-success-ink"],
+              ["unsatisfactory", "Unsatisfactory", "border-danger/40 bg-danger/10 text-danger"],
+              ["pending_review", "Keep pending", "border-warning/40 bg-warning/10 text-warning-ink"],
+            ] as const).map(([value, label, activeClass]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setReviewStatus(value)}
+                className={cn(
+                  "rounded-md border px-2 py-1.5 text-[10px] font-semibold",
+                  reviewStatus === value ? activeClass : "border-border text-muted-foreground",
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className="space-y-1">
+            <Label className="text-[10.5px]">QA interpretation</Label>
+            <Textarea
+              value={interpretation}
+              onChange={(event) => setInterpretation(event.target.value)}
+              className="min-h-[64px] text-[11px]"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-[10.5px]">Reviewer</Label>
+            <Input value={reviewer} onChange={(event) => setReviewer(event.target.value)} className="h-9 text-[11px]" />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
+          <Button onClick={submit} disabled={saving}>
+            {saving && <Loader2 className="size-3.5 animate-spin" />}
+            Save review
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 

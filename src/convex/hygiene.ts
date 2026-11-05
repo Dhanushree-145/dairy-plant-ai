@@ -1293,7 +1293,6 @@ function timeLabel(timestamp: number): string {
 type AssetState = Doc<"hygieneAssetStates">;
 type EmployeeState = Doc<"hygieneEmployeeStates">;
 type AlertState = Doc<"hygieneAlertStates">;
-type SampleState = Doc<"hygieneSampleStates">;
 
 function assetStatus(
   demo: DemoAsset,
