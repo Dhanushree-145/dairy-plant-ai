@@ -1,0 +1,1 @@
+import{r as t}from"./framer-motion-CYg4x7hG.js";function w(e=6e4){const[o,r]=t.useState(()=>Date.now());return t.useEffect(()=>{const n=window.setInterval(()=>r(Date.now()),e);return()=>window.clearInterval(n)},[e]),o}export{w as u};

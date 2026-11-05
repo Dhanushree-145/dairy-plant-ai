@@ -1,0 +1,17 @@
+{
+  "name": "DairySense — Smart Dairy Plant Intelligence",
+  "short_name": "DairySense",
+  "description": "Owner's overview for dairy plant production, energy, hygiene and waste.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F3F6FA",
+  "theme_color": "#162B4D",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
