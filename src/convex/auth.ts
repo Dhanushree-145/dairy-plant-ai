@@ -3,6 +3,7 @@
 import { convexAuth } from "@convex-dev/auth/server";
 import { Anonymous } from "@convex-dev/auth/providers/Anonymous";
 import { Password } from "@convex-dev/auth/providers/Password";
+import type { Value } from "convex/values";
 import { emailOtp } from "./auth/emailOtp";
 
 /**
@@ -18,15 +19,15 @@ const password = Password({
     if (!email) {
       throw new Error("Email is required");
     }
-    return {
-      email,
-      name: typeof params.name === "string" ? params.name.trim() : undefined,
-      phone: typeof params.phone === "string" ? params.phone.trim() : undefined,
-      plantName:
-        typeof params.plantName === "string"
-          ? params.plantName.trim()
-          : undefined,
-    };
+
+    const profile: Record<string, Value> = { email };
+    for (const key of ["name", "phone", "plantName"] as const) {
+      const value = params[key];
+      if (typeof value === "string" && value.trim().length > 0) {
+        profile[key] = value.trim();
+      }
+    }
+    return profile as Record<string, Value> & { email: string };
   },
   validatePasswordRequirements(pass) {
     if (pass.length < 8) {

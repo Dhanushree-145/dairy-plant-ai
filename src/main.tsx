@@ -121,13 +121,22 @@ createRoot(document.getElementById("root")!).render(
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route
+                path="/login"
+                element={<AuthPage mode="login" redirectAfterAuth="/dashboard" />}
+              />
+              <Route
+                path="/signup"
+                element={<AuthPage mode="signup" redirectAfterAuth="/dashboard" />}
+              />
+              {/* Kept so existing /auth links and returnTo redirects still work. */}
+              <Route
                 path="/auth"
-                element={<AuthPage redirectAfterAuth="/dashboard" />}
+                element={<AuthPage mode="login" redirectAfterAuth="/dashboard" />}
               />
               <Route
                 path="/dashboard"
                 element={
-                  <RequireAuth>
+                  <RequireAuth redirectImmediately>
                     <Dashboard />
                   </RequireAuth>
                 }
