@@ -36,12 +36,33 @@ const schema = defineSchema(
       plantName: v.optional(v.string()),
     }).index("email", ["email"]), // index for the email. do not remove or modify
 
-    // add other tables here
+    // Registered dairy plant equipment, owned by a user account.
+    machines: defineTable({
+      userId: v.id("users"),
+      name: v.string(),
+      code: v.string(),
+      category: v.string(),
+      stage: v.string(),
+      capacityValue: v.number(),
+      capacityUnit: v.string(),
+      ratedKw: v.number(),
+      baselineKwhPerHour: v.number(),
+      specifications: v.optional(v.string()),
+      installedAt: v.string(),
+      createdAt: v.number(),
+    })
+      .index("by_user", ["userId"])
+      .index("by_user_code", ["userId", "code"]),
 
-    // tableName: defineTable({
-    //   ...
-    //   // table fields
-    // }).index("by_field", ["field"])
+    // Manager acknowledgement / resolution state for generated machine alerts.
+    energyAlertStates: defineTable({
+      userId: v.id("users"),
+      alertKey: v.string(),
+      status: v.union(v.literal("acknowledged"), v.literal("resolved")),
+      updatedAt: v.number(),
+    })
+      .index("by_user", ["userId"])
+      .index("by_user_alert", ["userId", "alertKey"]),
   },
   {
     schemaValidation: false,
