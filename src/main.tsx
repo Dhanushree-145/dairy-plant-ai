@@ -23,6 +23,7 @@ const Hygiene = lazy(() => import("./pages/Hygiene.tsx"));
 const HygieneCategory = lazy(() => import("./pages/HygieneCategory.tsx"));
 const HygieneAsset = lazy(() => import("./pages/HygieneAsset.tsx"));
 const Waste = lazy(() => import("./pages/Waste.tsx"));
+const Simulator = lazy(() => import("./pages/Simulator.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
 /** Silent error boundary — if VlyToolbar crashes it renders nothing instead of
@@ -195,6 +196,14 @@ createRoot(document.getElementById("root")!).render(
                 element={
                   <RequireAuth redirectImmediately>
                     <Waste />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/dashboard/simulator"
+                element={
+                  <RequireAuth redirectImmediately>
+                    <Simulator />
                   </RequireAuth>
                 }
               />

@@ -16,6 +16,7 @@ import {
   Building2,
   ChevronDown,
   ChevronRight,
+  FlaskConical,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -36,7 +37,7 @@ type NavItem = {
   name: string;
   icon: LucideIcon;
   available: boolean;
-  key?: "overview" | "production" | "energy" | "hygiene" | "waste" | "profit" | "reports";
+  key?: "overview" | "production" | "energy" | "hygiene" | "waste" | "profit" | "reports" | "simulator";
   to?: string;
 };
 
@@ -84,6 +85,13 @@ const NAV_ITEMS: NavItem[] = [
     key: "reports",
     to: "/dashboard/reports",
   },
+  {
+    name: "What-If Simulator",
+    icon: FlaskConical,
+    available: true,
+    key: "simulator",
+    to: "/dashboard/simulator",
+  },
 ];
 
 export function AppShell({
@@ -95,7 +103,7 @@ export function AppShell({
   children: ReactNode;
   plantName?: string;
   sectionLabel?: string;
-  activeKey?: "overview" | "production" | "energy" | "hygiene" | "waste" | "profit" | "reports";
+  activeKey?: "overview" | "production" | "energy" | "hygiene" | "waste" | "profit" | "reports" | "simulator";
 }) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -112,7 +120,7 @@ export function AppShell({
   const handleLockedModule = (name: string) => {
     setMobileOpen(false);
     toast("Module not in this build", {
-      description: `${name} is not available yet. Overview, Milk & Production, Energy, Hygiene, Waste, Cost & Profit and Reports are available now.`,
+      description: `${name} is not available yet. Overview, Milk & Production, Energy, Hygiene, Waste, Cost & Profit, Reports and the What-If Simulator are available now.`,
       icon: <Sparkles className="size-4 text-primary" />,
     });
   };

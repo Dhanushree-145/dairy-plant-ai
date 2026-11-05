@@ -41,7 +41,7 @@ export function RequireAuth({
   const location = useLocation();
 
   if (isLoading) {
-    return <LoadingScreen label="Checking your plant access" />;
+    return <LoadingScreen />;
   }
 
   if (!isAuthenticated) {
