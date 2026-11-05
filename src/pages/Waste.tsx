@@ -7,6 +7,7 @@ import {
   WasteSection,
   WasteSourcePill,
 } from "@/components/waste/WasteBits";
+import { WasteDestinations } from "@/components/waste/WasteDestinations";
 import { WasteDisposal } from "@/components/waste/WasteDisposal";
 import { WasteRecords } from "@/components/waste/WasteRecords";
 import { WasteReports } from "@/components/waste/WasteReports";
@@ -42,6 +43,7 @@ import {
   FileText,
   Gauge,
   Leaf,
+  MapPin,
   PackageCheck,
   Plus,
   Recycle,
@@ -73,6 +75,7 @@ const TABS = [
   { key: "overview", label: "Overview", icon: Gauge },
   { key: "records", label: "Records", icon: ClipboardList },
   { key: "disposal", label: "Segregation & disposal", icon: Recycle },
+  { key: "destinations", label: "Destination tracking", icon: MapPin },
   { key: "analysis", label: "Analysis & forecast", icon: BarChart3 },
   { key: "reports", label: "Reports", icon: FileText },
   { key: "settings", label: "Settings", icon: Settings2 },
@@ -137,11 +140,6 @@ export default function Waste() {
               <h1 className="font-display text-[26px] font-semibold tracking-tight text-navy">Waste Management</h1>
               <DemoDataBadge />
             </div>
-            <p className="mt-1 max-w-3xl text-[12px] leading-relaxed text-muted-foreground">
-              Track six waste streams from generation to recovery or disposal, reconcile batch mass
-              balance and estimate cost. Simulation is labelled everywhere; missing readings stay
-              missing.
-            </p>
             <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[9.5px] text-muted-foreground">
               <span className="inline-flex items-center gap-1"><Scale className="size-3" /> {config.categories.length} streams</span>
               <span className="inline-flex items-center gap-1"><Truck className="size-3" /> {config.collectionSchedule}</span>
@@ -190,6 +188,9 @@ export default function Waste() {
           {tab === "overview" && <WasteOverview data={data} setTab={setTab} />}
           {tab === "records" && <WasteRecords data={data} config={config} />}
           {tab === "disposal" && <WasteDisposal data={data} config={config} />}
+          {tab === "destinations" && (
+            <WasteDestinations data={data} onOpenDisposal={() => setTab("disposal")} />
+          )}
           {tab === "analysis" && <WasteAnalysis data={data} />}
           {tab === "reports" && <WasteReports data={data} />}
           {tab === "settings" && <WasteSettings config={config} />}

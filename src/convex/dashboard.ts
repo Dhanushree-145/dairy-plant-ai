@@ -64,16 +64,6 @@ const ALERTS = [
     metric: "6.8°C",
   },
   {
-    id: "a-3",
-    title: "Pasteurizer PM-01 preventive maintenance due",
-    detail:
-      "Service is due in 2 days or 340 operating hours, whichever comes first. Last service was 88 days ago.",
-    module: "Inventory & Maintenance",
-    severity: "warning" as const,
-    minutesAgo: 190,
-    metric: "Due in 2 d",
-  },
-  {
     id: "a-4",
     title: "CIP cycle pending on cheese vat CV-04",
     detail:
@@ -102,16 +92,6 @@ const ALERTS = [
     severity: "critical" as const,
     minutesAgo: 1_140,
     metric: "260 kg",
-  },
-  {
-    id: "a-7",
-    title: "Packaging film stock below reorder point",
-    detail:
-      "1.2 tonnes of 500 ml film remaining against a 3-day buffer. Last delivery lead time was 4 days.",
-    module: "Inventory & Maintenance",
-    severity: "warning" as const,
-    minutesAgo: 1_380,
-    metric: "1.2 t",
   },
   {
     id: "a-8",

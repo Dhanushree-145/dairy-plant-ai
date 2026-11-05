@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
   BarChart3,
-  Boxes,
   CheckCircle2,
   Droplets,
   Gauge,
@@ -56,7 +55,6 @@ const stages = [
 const modules = [
   { name: "Hygiene & Quality", icon: ShieldCheck },
   { name: "Waste Management", icon: Recycle },
-  { name: "Inventory & Maintenance", icon: Boxes },
 ];
 
 function FeatureVisual({ kind }: { kind: "production" | "energy" | "health" | "profit" }) {
@@ -492,7 +490,7 @@ export default function Landing() {
                 On the roadmap
               </p>
               <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-navy sm:text-4xl">
-                Five modules shipped. Three next.
+                Five modules shipped. Two next.
               </h2>
               <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
                 Overview, Milk &amp; Production, Energy &amp; Machines, Cost &amp; Profit

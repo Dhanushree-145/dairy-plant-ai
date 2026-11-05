@@ -736,6 +736,96 @@ async function generateDemoRecords(
   return inserted;
 }
 
+const DEMO_DESTINATIONS: Record<
+  string,
+  { method: string; destination: string }
+> = {
+  "Milk waste": {
+    method: "Recovered for biogas",
+    destination: "Sahyadri biogas plant",
+  },
+  Wastewater: {
+    method: "Treated on site",
+    destination: "On-site effluent treatment plant",
+  },
+  "Packaging waste": {
+    method: "Recycled",
+    destination: "Pune flexible packaging recyclers",
+  },
+  "Rejected product": {
+    method: "Composted",
+    destination: "GreenLoop composting facility",
+  },
+  "Filtration residue": {
+    method: "Composted",
+    destination: "GreenLoop composting facility",
+  },
+  "Chemical waste": {
+    method: "Authorized chemical disposal",
+    destination: "MPCB authorized TSDF",
+  },
+};
+
+async function generateDemoDestinations(
+  ctx: MutationCtx,
+  userId: Id<"users">,
+  config: ConfigShape,
+  days = 30,
+) {
+  const existing = await ctx.db
+    .query("wasteDisposals")
+    .withIndex("by_user", (q) => q.eq("userId", userId))
+    .first();
+  if (existing) return 0;
+
+  const cutoff = Date.now() - days * DAY;
+  const records = await ctx.db
+    .query("wasteRecords")
+    .withIndex("by_user_recorded", (q) => q.eq("userId", userId))
+    .order("desc")
+    .take(400);
+  const eligible = records.filter(
+    (record) =>
+      record.source === "simulated" &&
+      record.disposalStatus !== "Pending disposal" &&
+      record.recordedAt >= cutoff,
+  );
+
+  const grouped = new Map<string, typeof eligible>();
+  for (const record of eligible) {
+    const key = `${record.category}|${record.disposalStatus}`;
+    const group = grouped.get(key) ?? [];
+    group.push(record);
+    grouped.set(key, group);
+  }
+
+  let inserted = 0;
+  for (const group of grouped.values()) {
+    const template = DEMO_DESTINATIONS[group[0]?.category ?? ""];
+    const method = template?.method ?? group[0]?.recoveryMethod ?? "Authorized disposal";
+    const destination = template?.destination ?? "Authorized disposal vendor";
+    for (let index = 0; index < group.length; index += 4) {
+      const chunk = group.slice(index, index + 4);
+      const latest = Math.max(...chunk.map((record) => record.recordedAt));
+      await ctx.db.insert("wasteDisposals", {
+        userId,
+        recordIds: chunk.map((record) => record._id),
+        method,
+        destination,
+        collectedAt: Math.min(Date.now() - 60_000, latest + 2 * 3_600_000),
+        collectedBy:
+          config.responsible[inserted % Math.max(1, config.responsible.length)] ??
+          "Plant manager",
+        confirmed: true,
+        notes: "SIMULATED destination manifest generated for the demo dataset.",
+        createdAt: Date.now(),
+      });
+      inserted += 1;
+    }
+  }
+  return inserted;
+}
+
 function seed(value: number): number {
   return value * 12.9898 + 4.1414;
 }
@@ -820,7 +910,19 @@ export const configure = mutation({
     if (seeded > 0) {
       await writeAudit(ctx, userId, "demo.generated", "wasteRecords", `${seeded} simulated records.`);
     }
-    return { configured: true, seeded };
+    const destinations = seeded > 0
+      ? await generateDemoDestinations(ctx, userId, input)
+      : 0;
+    if (destinations > 0) {
+      await writeAudit(
+        ctx,
+        userId,
+        "demo.destinations",
+        "wasteDisposals",
+        `${destinations} simulated destination manifests.`,
+      );
+    }
+    return { configured: true, seeded, destinations };
   },
 });
 
@@ -854,6 +956,7 @@ export const dashboard = query({
       .order("desc")
       .take(60);
     const records = allRecords.map(serializeRecord);
+    const recordById = new Map(allRecords.map((record) => [record._id, record]));
     const since = now - days * DAY;
     const periodRecords = records.filter((record) => record.recordedAt >= since);
     const previousRecords = records.filter(
@@ -1036,16 +1139,30 @@ export const dashboard = query({
       config: configDoc,
       records: records.slice(0, 500),
       periodRecords: periodRecords.length,
-      disposals: disposals.map((disposal) => ({
-        id: disposal._id,
-        method: disposal.method,
-        destination: disposal.destination,
-        collectedAt: disposal.collectedAt,
-        collectedBy: disposal.collectedBy,
-        confirmed: disposal.confirmed,
-        notes: disposal.notes ?? null,
-        recordCount: disposal.recordIds.length,
-      })),
+      disposals: disposals.map((disposal) => {
+        const linked = disposal.recordIds
+          .map((id) => recordById.get(id))
+          .filter((record): record is Doc<"wasteRecords"> => Boolean(record));
+        return {
+          id: disposal._id,
+          method: disposal.method,
+          destination: disposal.destination,
+          collectedAt: disposal.collectedAt,
+          collectedBy: disposal.collectedBy,
+          confirmed: disposal.confirmed,
+          notes: disposal.notes ?? null,
+          recordCount: disposal.recordIds.length,
+          recordIds: disposal.recordIds.map((id) => String(id)),
+          totalKg: round(
+            linked.reduce(
+              (total, record) => total + kgEquivalent(record.category, record.quantity),
+              0,
+            ),
+            1,
+          ),
+          categories: [...new Set(linked.map((record) => record.category))],
+        };
+      }),
       kpis: {
         totalToday: round(sumKg(todayRecords), 1),
         milkToday: round(sum(todayRecords, "Milk waste"), 1),
@@ -1377,5 +1494,27 @@ export const seedDemo = mutation({
     const count = await generateDemoRecords(ctx, userId, configDoc, 3);
     await writeAudit(ctx, userId, "demo.generated", "wasteRecords", `${count} simulated records.`);
     return { inserted: count };
+  },
+});
+
+export const seedDemoDestinations = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new ConvexError("Sign in to add demo destination manifests.");
+    const configDoc = await ctx.db
+      .query("wasteConfigs")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .unique();
+    if (!configDoc) throw new ConvexError("Configure waste management first.");
+    const inserted = await generateDemoDestinations(ctx, userId, configDoc, 90);
+    await writeAudit(
+      ctx,
+      userId,
+      "demo.destinations",
+      "wasteDisposals",
+      `${inserted} simulated destination manifests.`,
+    );
+    return { inserted };
   },
 });

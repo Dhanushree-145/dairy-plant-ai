@@ -13,7 +13,6 @@ import { initials } from "@/lib/dashboard";
 import { cn } from "@/lib/utils";
 import {
   BarChart3,
-  Boxes,
   Building2,
   ChevronDown,
   ChevronRight,
@@ -71,7 +70,6 @@ const NAV_ITEMS: NavItem[] = [
     key: "waste",
     to: "/dashboard/waste",
   },
-  { name: "Inventory & Maintenance", icon: Boxes, available: false },
   {
     name: "Cost & Profit",
     icon: Wallet,
