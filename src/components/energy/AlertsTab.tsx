@@ -226,9 +226,10 @@ export function AlertsTab({
           </h2>
           <ul className="mt-2 space-y-1.5 text-[10.5px] leading-relaxed text-muted-foreground">
             <li>Daily energy above the configured baseline by 13% or more.</li>
-            <li>Efficiency below 84% of the 90% target, or below 74% for critical.</li>
+            <li>Efficiency score below 84 against the 90 target, or below 74 for critical.</li>
             <li>Refrigeration temperature above 4.5°C against the 2–4°C range.</li>
             <li>Machine ON while drawing under 45% of its expected load.</li>
+            <li>One or more unexpected shutdowns in the recorded history.</li>
             <li>Preventive service due within seven days.</li>
             <li>Status missing from the meter — never treated as OFF.</li>
           </ul>

@@ -370,7 +370,7 @@ export function formatDecimal(value: number, digits = 1): string {
 }
 
 export function compactKwh(value: number): string {
-  if (value >= 100_000) return `${formatDecimal(value / 100_000, 2)} L kWh`;
+  if (value >= 1_000_000) return `${formatDecimal(value / 1_000_000, 2)}M kWh`;
   if (value >= 1_000) return `${formatDecimal(value / 1_000, 1)}k kWh`;
   return `${Math.round(value)} kWh`;
 }

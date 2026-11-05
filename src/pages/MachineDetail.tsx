@@ -33,6 +33,7 @@ import {
   Gauge,
   Info,
   Pencil,
+  ThermometerSnowflake,
   TriangleAlert,
   Wrench,
   Zap,
@@ -43,6 +44,7 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
+  ComposedChart,
   Line,
   ReferenceLine,
   ResponsiveContainer,
@@ -367,7 +369,7 @@ export default function MachineDetail() {
 
             <div className="mt-3 h-[260px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
+                <ComposedChart
                   data={detail.series.points}
                   margin={{ top: 6, right: 6, left: -10, bottom: 0 }}
                 >
@@ -383,7 +385,13 @@ export default function MachineDetail() {
                     tickLine={false}
                     axisLine={false}
                     tick={{ fill: CHART.axis, fontSize: 9.5 }}
-                    interval={detail.series.points.length > 14 ? 4 : 0}
+                    interval={
+                      detail.series.points.length > 30
+                        ? 9
+                        : detail.series.points.length > 14
+                          ? 4
+                          : 0
+                    }
                     dy={5}
                   />
                   <YAxis
@@ -427,7 +435,7 @@ export default function MachineDetail() {
                     dot={false}
                     animationDuration={600}
                   />
-                </AreaChart>
+                </ComposedChart>
               </ResponsiveContainer>
             </div>
 
@@ -546,6 +554,15 @@ export default function MachineDetail() {
                   label: "Unexpected shutdowns",
                   value: `${machine.unexpectedShutdowns}`,
                 },
+                ...(machine.temperatureC !== null
+                  ? [
+                      {
+                        icon: ThermometerSnowflake,
+                        label: "Temperature",
+                        value: `${machine.temperatureC}°C`,
+                      },
+                    ]
+                  : []),
                 {
                   icon: Gauge,
                   label: "Last telemetry",
@@ -592,7 +609,7 @@ export default function MachineDetail() {
                     <span className="size-1.5 rounded-full bg-muted-foreground/40" /> OFF
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="size-1.5 rounded-full bg-danger" /> Fault
+                    <span className="size-1.5 rounded-full bg-danger" /> Fault / unknown
                   </span>
                 </div>
               </div>
@@ -766,7 +783,7 @@ export default function MachineDetail() {
                     interval={Math.max(0, Math.floor(detail.series.performance.length / 4))}
                     dy={4}
                   />
-                  <YAxis domain={[50, 100]} hide />
+                  <YAxis domain={[40, 100]} hide />
                   <Tooltip content={<ChartTooltip unit="%" />} cursor={{ stroke: "#CBD8E7" }} />
                   <ReferenceLine
                     y={90}

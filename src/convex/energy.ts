@@ -146,7 +146,14 @@ function liveState(
     };
   }
 
-  const load = machine.baselineKwhPerHour * (0.82 + noise(seed + bucket * 1.77) * 0.42);
+  // A minority of units occasionally sit in a low-load state while still ON,
+  // which is what the idle / low-load anomaly rule watches for.
+  const idleProne = noise(seed + 73) < 0.3;
+  const lowLoad = idleProne && noise(seed + bucket * 3.17) < 0.45;
+  const loadFactor = lowLoad
+    ? 0.22 + noise(seed + bucket * 4.7) * 0.18
+    : 0.82 + noise(seed + bucket * 1.77) * 0.42;
+  const load = machine.baselineKwhPerHour * loadFactor;
   return {
     status: "on",
     currentKw: round(Math.max(0.3, load), 2),
@@ -198,7 +205,7 @@ function temperature(machine: Machine): number | null {
 
 function maintenanceFor(machine: Machine, now: number) {
   const seed = seedFor(machine);
-  const lastService = now - (12 + noise(seed + 61) * 54) * DAY;
+  const lastService = now - (12 + noise(seed + 61) * 96) * DAY;
   const entries = Array.from({ length: 3 }, (_, index) => {
     const timestamp = lastService - index * 92 * DAY;
     return {
@@ -213,7 +220,7 @@ function maintenanceFor(machine: Machine, now: number) {
   });
   return {
     entries,
-    nextMaintenanceAt: lastService + 90 * DAY,
+    nextMaintenanceAt: Math.round(lastService + 90 * DAY),
   };
 }
 
@@ -238,6 +245,8 @@ function buildSnapshot(machine: Machine, now: number, periodDays: number) {
   const idleHours = Math.round(operatingHours * (0.06 + noise(seed + 43) * 0.08));
   const totalKwh = Math.round(operatingHours * machine.baselineKwhPerHour * (performance / 100));
   const maintenance = maintenanceFor(machine, now);
+  const unexpectedShutdowns =
+    noise(seed + 61) < 0.4 ? 1 + Math.floor(noise(seed + 67) * 2) : 0;
 
   return {
     id: machine._id,
@@ -261,7 +270,7 @@ function buildSnapshot(machine: Machine, now: number, periodDays: number) {
       live.status === "off" ? now - Math.round((8 + noise(seed + 53) * 300) * 60_000) : null,
     operatingHours,
     idleHours,
-    unexpectedShutdowns: Math.floor(noise(seed + 61) * 3),
+    unexpectedShutdowns,
     performance,
     temperatureC: temperature(machine),
     todayKwh,
@@ -424,17 +433,17 @@ function buildAlerts(snapshot: Snapshot, now: number): AlertDraft[] {
     });
   }
 
-  if (snapshot.unexpectedShutdowns > 0 && noise(seedFor(snapshot) + 71) > 0.45) {
+  if (snapshot.unexpectedShutdowns > 0) {
     alerts.push({
       ...base,
       key: `${snapshot.id}:unexpected_shutdown`,
       issueType: "unexpected_shutdown",
       title: `${snapshot.unexpectedShutdowns} unexpected shutdown${snapshot.unexpectedShutdowns > 1 ? "s" : ""} recorded`,
-      severity: "critical",
+      severity: snapshot.unexpectedShutdowns >= 2 ? "critical" : "warning",
       currentValue: snapshot.unexpectedShutdowns,
       expectedValue: 0,
       unit: "events",
-      currentLabel: `${snapshot.unexpectedShutdowns} shutdowns`,
+      currentLabel: `${snapshot.unexpectedShutdowns} shutdown${snapshot.unexpectedShutdowns === 1 ? "" : "s"}`,
       expectedLabel: "0 expected",
       detectedAt: detected(241),
       recommendation:
@@ -603,22 +612,6 @@ function buildRecommendations(
       monthlySaving: Math.round(averagePlantDay * 0.06 * 30 * TARIFF),
       confidence: 81,
       basis: "Simulated load profile across registered machines",
-    });
-    recommendations.push({
-      id: "plant:setpoint",
-      title: "Raise chilled-water setpoint by 0.5°C and verify product safety",
-      problem:
-        "The simulated chilled-water loop is running below the configured process target, which adds compressor hours without improving product temperature.",
-      action:
-        "Raise the loop setpoint by 0.5°C, verify milk outlet temperature stays inside the 2–4°C range, and monitor for 48 hours.",
-      category: "schedule",
-      priority: "low",
-      machineId: null,
-      machineName: null,
-      monthlyKwhSaving: round(averagePlantDay * 0.035 * 30, 0),
-      monthlySaving: Math.round(averagePlantDay * 0.035 * 30 * TARIFF),
-      confidence: 74,
-      basis: "Simulated refrigerant load vs process target",
     });
   }
 

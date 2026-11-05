@@ -113,7 +113,7 @@ export function AppShell({
   const handleLockedModule = (name: string) => {
     setMobileOpen(false);
     toast("Module not in this build", {
-      description: `${name} is scheduled after the live Overview and Energy & Machines modules.`,
+      description: `${name} is not available yet. Overview and Energy & Machines are available now.`,
       icon: <Sparkles className="size-4 text-primary" />,
     });
   };
@@ -177,7 +177,12 @@ export function AppShell({
                 <Link
                   to={item.to ?? "/dashboard"}
                   aria-current={active ? "page" : undefined}
-                  onClick={() => setMobileOpen(false)}
+                  onClick={() => {
+                    setMobileOpen(false);
+                    if (active) {
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }
+                  }}
                   className={cn(
                     "relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12.5px] font-medium transition-colors",
                     active
@@ -200,7 +205,7 @@ export function AppShell({
                   ) : (
                     item.key === "energy" && (
                       <span className="rounded border border-primary/30 bg-primary/10 px-1 py-0.5 text-[8px] font-semibold uppercase tracking-wider text-primary">
-                        Live
+                        New
                       </span>
                     )
                   )}

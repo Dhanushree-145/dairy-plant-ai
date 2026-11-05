@@ -163,7 +163,7 @@ export function AlertItem({
               size="sm"
               onClick={() => update("resolved")}
               disabled={pending !== null}
-              className="h-7 gap-1 bg-success text-white text-[10.5px] hover:bg-success/90"
+              className="h-7 gap-1 bg-success-ink text-[10.5px] text-white hover:bg-success-ink/90"
             >
               <CheckCheck className="size-3" />
               {pending === "resolved" ? "Saving…" : "Resolve"}

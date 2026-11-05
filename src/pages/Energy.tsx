@@ -304,7 +304,7 @@ export default function Energy() {
             </span>
             <span className="flex items-center gap-1.5 font-semibold text-navy">
               <span className="size-1.5 animate-pulse rounded-full bg-success" />
-              {data.totals.currentLoadKw.toFixed(1)} kW load
+              {data.totals.currentLoadKw.toFixed(1)} kW metered
             </span>
           </div>
         </div>

@@ -492,7 +492,7 @@ export default function Landing() {
                 On the roadmap
               </p>
               <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-navy sm:text-4xl">
-                Two modules live. Seven next.
+                Two modules shipped. Seven next.
               </h2>
               <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
                 Overview and Energy &amp; Machines are live today: owner KPIs plus
@@ -503,7 +503,7 @@ export default function Landing() {
             </div>
             <span className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-white px-3 py-1.5 text-[11px] font-medium text-muted-foreground">
               <span className="size-1.5 rounded-full bg-primary" />
-              Live in this build
+              Shipped in this build
             </span>
           </motion.div>
 
@@ -517,7 +517,7 @@ export default function Landing() {
                   <Gauge className="size-4" />
                 </span>
                 <span className="rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-semibold text-success-ink">
-                  Live
+                  Shipped
                 </span>
               </div>
               <div className="mt-6">
@@ -537,7 +537,7 @@ export default function Landing() {
                   <Zap className="size-4" />
                 </span>
                 <span className="rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-semibold text-success-ink">
-                  Live
+                  Shipped
                 </span>
               </div>
               <div className="mt-6">

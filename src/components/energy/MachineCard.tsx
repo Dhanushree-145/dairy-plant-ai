@@ -42,7 +42,7 @@ export function MachineCard({
       <Link
         to={`/dashboard/energy/machines/${machine.id}`}
         className={cn(
-          "group flex h-full flex-col rounded-xl border bg-card p-4 pr-11 shadow-card transition-all hover:-translate-y-0.5 hover:shadow-float/50",
+          "group flex h-full flex-col rounded-xl border bg-card p-4 pr-11 shadow-card transition-all hover:-translate-y-0.5 hover:shadow-float",
           unavailable
             ? "border-danger/35 bg-danger/[0.015] hover:border-danger/55"
             : "border-border/80 hover:border-primary/30",

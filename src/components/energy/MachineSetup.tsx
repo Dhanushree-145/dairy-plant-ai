@@ -146,6 +146,10 @@ export function MachineSetup() {
       setError("Select at least one machine type to continue.");
       return;
     }
+    if (selectedCount > 40) {
+      setError("Register up to 40 machines at a time. Split a larger fleet into two batches.");
+      return;
+    }
     setError(null);
     setDrafts(mergeDrafts(drafts, counts));
     setStep(2);
@@ -229,9 +233,16 @@ export function MachineSetup() {
                 pre-filled — adjust it to match your plant.
               </p>
             </div>
-            <span className="rounded-full border border-border bg-background px-2.5 py-1 text-[10.5px] font-semibold text-navy">
-              {selectedCount} machine{selectedCount === 1 ? "" : "s"} selected
-            </span>
+            <div className="flex flex-col items-end gap-1">
+              <span className="rounded-full border border-border bg-background px-2.5 py-1 text-[10.5px] font-semibold text-navy">
+                {selectedCount} machine{selectedCount === 1 ? "" : "s"} selected
+              </span>
+              {selectedCount > 40 && (
+                <span className="text-[9.5px] font-medium text-danger">
+                  Up to 40 machines per registration
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-2">
@@ -329,7 +340,7 @@ export function MachineSetup() {
             <Button
               type="button"
               onClick={goToDetails}
-              disabled={selectedCount === 0}
+              disabled={selectedCount === 0 || selectedCount > 40}
               className="h-8 shrink-0 gap-1.5 text-[11.5px]"
             >
               Configure machines
@@ -360,6 +371,10 @@ export function MachineSetup() {
             {drafts.map((draft, index) => {
               const category = categoryMeta(draft.category);
               const Icon = category.icon;
+              const unitNumber =
+                drafts
+                  .slice(0, index)
+                  .filter((item) => item.category === draft.category).length + 1;
               return (
                 <div
                   key={`${draft.category}-${index}`}
@@ -374,7 +389,7 @@ export function MachineSetup() {
                         {category.label}
                       </p>
                       <p className="text-[9.5px] font-medium uppercase tracking-wider text-muted-foreground">
-                        Unit {index + 1} · {category.defaultStage}
+                        Unit {unitNumber} · {category.defaultStage}
                       </p>
                     </div>
                     <button

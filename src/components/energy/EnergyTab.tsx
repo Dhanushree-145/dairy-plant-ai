@@ -132,7 +132,15 @@ export function EnergyTab({
                   tickLine={false}
                   axisLine={false}
                   tick={{ fill: CHART.axis, fontSize: 10 }}
-                  interval={mode === "daily" ? (series.length > 14 ? 5 : 0) : 1}
+                  interval={
+                    mode !== "daily"
+                      ? 1
+                      : series.length > 30
+                        ? 9
+                        : series.length > 14
+                          ? 4
+                          : 0
+                  }
                   dy={6}
                 />
                 <YAxis
@@ -267,7 +275,7 @@ export function EnergyTab({
               </dd>
             </div>
             <div className="flex items-baseline justify-between gap-2">
-              <dt className="text-muted-foreground">Current plant load</dt>
+              <dt className="text-muted-foreground">Metered load, known units</dt>
               <dd className="font-semibold text-navy">
                 {data.totals.currentLoadKw.toFixed(1)} kW
               </dd>
