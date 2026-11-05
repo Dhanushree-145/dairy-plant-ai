@@ -1,8 +1,7 @@
-import { AlertItem } from "@/components/energy/AlertItem";
 import { ChartLegend, ChartTooltip, CHART } from "@/components/energy/ChartBits";
 import { MachineFormDialog } from "@/components/energy/MachineFormDialog";
 import { StatusPill } from "@/components/energy/StatusPill";
-import { AppShell, type ShellAlert } from "@/components/dashboard/AppShell";
+import { AppShell } from "@/components/dashboard/AppShell";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/convex/_generated/api";
@@ -82,8 +81,6 @@ export default function MachineDetail() {
     return (
       <AppShell
         plantName={user?.plantName}
-        alertCount={0}
-        alerts={[]}
         sectionLabel="Energy & Machines"
         activeKey="energy"
       >
@@ -96,8 +93,6 @@ export default function MachineDetail() {
     return (
       <AppShell
         plantName={user?.plantName}
-        alertCount={0}
-        alerts={[]}
         sectionLabel="Energy & Machines"
         activeKey="energy"
       >
@@ -127,7 +122,6 @@ export default function MachineDetail() {
   const Icon = category.icon;
   const performance = performanceMeta(machine.performance);
   const statusMeta = STATUS_META[machine.status];
-  const activeAlerts = detail.alerts.filter((alert) => alert.status !== "resolved");
   const changePct =
     detail.series.previousTotal > 0
       ? ((detail.series.currentTotal - detail.series.previousTotal) /
@@ -142,14 +136,6 @@ export default function MachineDetail() {
       : 0;
   const daysToService = Math.ceil((detail.nextMaintenanceAt - now) / 86_400_000);
   const serviceSoon = daysToService <= 14;
-
-  const shellAlerts: ShellAlert[] = activeAlerts.slice(0, 3).map((alert) => ({
-    id: alert.key,
-    title: alert.title,
-    module: `Energy · ${machine.code}`,
-    severity: alert.severity === "critical" ? "critical" : "warning",
-    minutesAgo: Math.max(1, Math.round((now - alert.detectedAt) / 60_000)),
-  }));
 
   const energyTiles = [
     {
@@ -199,16 +185,8 @@ export default function MachineDetail() {
   return (
     <AppShell
       plantName={user?.plantName}
-      alertCount={activeAlerts.length}
-      alerts={shellAlerts}
       sectionLabel="Energy & Machines"
       activeKey="energy"
-      onViewAlerts={() => {
-        document.getElementById("machine-alerts")?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }}
     >
       <div className="mx-auto max-w-[1440px] space-y-5 px-4 pb-10 pt-6 sm:px-6 lg:px-8 lg:pt-8">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -822,43 +800,6 @@ export default function MachineDetail() {
             </p>
           </section>
         </div>
-
-        <section id="machine-alerts" className="scroll-mt-24 rounded-xl border border-border/80 bg-card p-4 shadow-card sm:p-5">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h2 className="flex items-center gap-2 font-display text-[15px] font-semibold text-navy">
-                Machine alerts
-                <span className="rounded-full bg-danger/10 px-1.5 py-0.5 text-[10px] font-semibold text-danger">
-                  {activeAlerts.length}
-                </span>
-              </h2>
-              <p className="mt-0.5 text-[11.5px] text-muted-foreground">
-                Detected issues with readings, expected values and corrective actions
-              </p>
-            </div>
-            {activeAlerts.some((alert) => alert.severity === "critical") && (
-              <span className="inline-flex items-center gap-1 rounded-full border border-danger/25 bg-danger/10 px-2 py-0.5 text-[9.5px] font-semibold text-danger">
-                <TriangleAlert className="size-3" />
-                {activeAlerts.filter((alert) => alert.severity === "critical").length} critical
-              </span>
-            )}
-          </div>
-
-          {detail.alerts.length === 0 ? (
-            <div className="mt-3 flex items-start gap-2 rounded-lg border border-success/25 bg-success/[0.05] px-3 py-2.5">
-              <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-success" />
-              <p className="text-[11px] text-success-ink">
-                No alerts are open for this machine in the current simulated dataset.
-              </p>
-            </div>
-          ) : (
-            <div className="mt-3 grid gap-2.5 xl:grid-cols-2">
-              {detail.alerts.map((alert) => (
-                <AlertItem key={alert.key} alert={alert} now={now} compact />
-              ))}
-            </div>
-          )}
-        </section>
 
         <div className="flex flex-col gap-2 rounded-xl border border-warning/25 bg-warning/[0.055] px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="flex gap-2 text-[10.5px] leading-relaxed text-navy/75">

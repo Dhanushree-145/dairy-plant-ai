@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { query } from "./_generated/server";
 
 /**
- * Version 1 of DairyPulse ships the Overview dashboard only. Until plant
+ * Version 1 of DairySense ships the Overview dashboard only. Until plant
  * hardware is connected, the overview is computed from a deterministic
  * simulated dataset that is clearly labelled as such in the UI. Replacing this
  * module with readings tables (or an ingestion action) is the only change the

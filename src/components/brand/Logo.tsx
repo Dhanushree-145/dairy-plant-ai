@@ -21,7 +21,7 @@ export function Brand({
               tone === "light" ? "text-white" : "text-navy",
             )}
           >
-            Dairy<span className="text-primary">Pulse</span>
+            Dairy<span className="text-primary">Sense</span>
           </span>
           <span
             className={cn(

@@ -3,11 +3,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
 import {
   formatCurrency,
-  formatRelativeMinutes,
   numberFormatter,
   timeOfDayGreeting,
   type DashboardRange,
-  type OverviewAlert,
   type OverviewData,
   type OverviewRecommendation,
 } from "@/lib/dashboard";
@@ -19,7 +17,6 @@ import {
   CalendarDays,
   Check,
   CheckCircle2,
-  ChevronDown,
   CircleAlert,
   Droplets,
   Gauge,
@@ -30,7 +27,6 @@ import {
   ShieldCheck,
   Sparkles,
   ThermometerSnowflake,
-  TriangleAlert,
   Zap,
 } from "lucide-react";
 import { useState } from "react";
@@ -163,11 +159,8 @@ export function Overview({
         <PerformanceCard data={data} />
       </div>
 
-      {/* Alerts + product mix */}
-      <div className="grid gap-4 lg:grid-cols-3">
-        <AlertsCard alerts={data.alerts} summary={data.alertSummary} />
-        <ProductMixCard products={data.productMix} />
-      </div>
+      {/* Product mix */}
+      <ProductMixCard products={data.productMix} />
 
       {/* Recommendation centre */}
       <RecommendationCentre
@@ -182,7 +175,7 @@ export function Overview({
       </div>
 
       <p className="pt-1 text-center text-[10.5px] leading-relaxed text-muted-foreground">
-        DairyPulse keeps monitoring, detection and optimisation tied to the same
+        DairySense keeps milk, production, energy, cost and profit tied to the same
         plant records. Figures shown are simulated for demonstration and are not
         live sensor readings.
       </p>
@@ -542,141 +535,6 @@ function PerformanceCard({ data }: { data: OverviewData }) {
           );
         })}
       </div>
-    </section>
-  );
-}
-
-function AlertsCard({
-  alerts,
-  summary,
-}: {
-  alerts: OverviewAlert[];
-  summary: OverviewData["alertSummary"];
-}) {
-  const [filter, setFilter] = useState<"all" | "critical" | "warning">("all");
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-
-  const sorted = [...alerts].sort((a, b) => {
-    const weight = { critical: 0, warning: 1 } as Record<string, number>;
-    if (weight[a.severity] !== weight[b.severity]) {
-      return weight[a.severity] - weight[b.severity];
-    }
-    return a.minutesAgo - b.minutesAgo;
-  });
-  const visible = sorted.filter((alert) => filter === "all" || alert.severity === filter);
-
-  return (
-    <section
-      id="pending-alerts"
-      className="scroll-mt-24 rounded-xl border border-border/80 bg-card p-4 shadow-card sm:p-5 lg:col-span-2"
-    >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="flex items-center gap-2 font-display text-[15px] font-semibold text-navy">
-            Pending alerts
-            <span className="rounded-full bg-danger/10 px-1.5 py-0.5 text-[10px] font-semibold text-danger">
-              {summary.total}
-            </span>
-          </h2>
-          <p className="mt-0.5 text-[11.5px] text-muted-foreground">
-            Detected from the current demo records, most urgent first
-          </p>
-        </div>
-        <div className="flex items-center gap-0.5 rounded-lg border border-border bg-background p-0.5">
-          {(
-            [
-              ["all", `All ${summary.total}`],
-              ["critical", `Critical ${summary.critical}`],
-              ["warning", `Warning ${summary.warning}`],
-            ] as const
-          ).map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setFilter(value)}
-              aria-pressed={filter === value}
-              className={cn(
-                "rounded-md px-2 py-1 text-[10.5px] font-semibold transition-colors",
-                filter === value
-                  ? "bg-white text-navy shadow-sm"
-                  : "text-muted-foreground hover:text-navy",
-              )}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="mt-3 divide-y divide-border/70">
-        {visible.map((alert) => {
-          const isOpen = expandedId === alert.id;
-          const critical = alert.severity === "critical";
-          return (
-            <div key={alert.id} className="py-2 first:pt-1 last:pb-0">
-              <button
-                type="button"
-                onClick={() => setExpandedId(isOpen ? null : alert.id)}
-                aria-expanded={isOpen}
-                className="flex w-full items-center gap-2.5 rounded-lg px-1.5 py-1 text-left transition-colors hover:bg-muted/50"
-              >
-                <span
-                  className={cn(
-                    "flex size-7 shrink-0 items-center justify-center rounded-lg",
-                    critical ? "bg-danger/10 text-danger" : "bg-warning/10 text-warning",
-                  )}
-                >
-                  <TriangleAlert className="size-3.5" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[12px] font-semibold text-navy">
-                    {alert.title}
-                  </span>
-                  <span className="mt-0.5 flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                    <span>{alert.module}</span>
-                    <span className="size-0.5 rounded-full bg-muted-foreground/40" />
-                    <span>{formatRelativeMinutes(alert.minutesAgo)}</span>
-                  </span>
-                </span>
-                <span
-                  className={cn(
-                    "hidden shrink-0 rounded-full px-1.5 py-0.5 text-[9.5px] font-semibold sm:inline",
-                    critical ? "bg-danger/10 text-danger" : "bg-warning/10 text-warning-ink",
-                  )}
-                >
-                  {critical ? "Critical" : "Warning"}
-                </span>
-                <ChevronDown
-                  className={cn(
-                    "size-3.5 shrink-0 text-muted-foreground transition-transform",
-                    isOpen && "rotate-180",
-                  )}
-                />
-              </button>
-              {isOpen && (
-                <div className="ml-[38px] mt-1 rounded-lg bg-background/70 px-3 py-2">
-                  <p className="text-[11.5px] leading-relaxed text-muted-foreground">
-                    {alert.detail}
-                  </p>
-                  <p className="mt-1.5 text-[10.5px] font-medium text-navy/70">
-                    Current reading: <span className="font-semibold text-navy">{alert.metric}</span>
-                  </p>
-                </div>
-              )}
-            </div>
-          );
-        })}
-        {visible.length === 0 && (
-          <p className="py-6 text-center text-[12px] text-muted-foreground">
-            No alerts in this category.
-          </p>
-        )}
-      </div>
-
-      <p className="mt-2 border-t border-border/70 pt-2 text-[10px] text-muted-foreground">
-        Alert rules run on the demo dataset. Connect plant telemetry in a later
-        release to monitor live equipment.
-      </p>
     </section>
   );
 }

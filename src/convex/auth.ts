@@ -1,41 +1,14 @@
 // THIS FILE IS READ ONLY. Do not touch this file unless you are correctly adding a new auth provider in accordance to the vly auth documentation
 
 import { convexAuth } from "@convex-dev/auth/server";
-import { Anonymous } from "@convex-dev/auth/providers/Anonymous";
-import { Password } from "@convex-dev/auth/providers/Password";
-import type { Value } from "convex/values";
 import { emailOtp } from "./auth/emailOtp";
 
 /**
- * Email + password provider used by the DairyPulse login and sign-up pages.
- * Sign-up collects the owner's name, phone and plant name alongside the
- * credential, so those land on the user document.
+ * DairySense uses passwordless email one-time codes. The same flow works for
+ * Gmail addresses and plant domains: the gateway emails a 6-digit code, and
+ * Convex Auth creates the account on first successful verification. Profile
+ * fields collected at sign-up are saved after verification by profile.ts.
  */
-const password = Password({
-  profile(params) {
-    const email = String(params.email ?? "")
-      .trim()
-      .toLowerCase();
-    if (!email) {
-      throw new Error("Email is required");
-    }
-
-    const profile: Record<string, Value> = { email };
-    for (const key of ["name", "phone", "plantName"] as const) {
-      const value = params[key];
-      if (typeof value === "string" && value.trim().length > 0) {
-        profile[key] = value.trim();
-      }
-    }
-    return profile as Record<string, Value> & { email: string };
-  },
-  validatePasswordRequirements(pass) {
-    if (pass.length < 8) {
-      throw new Error("Password must be at least 8 characters long");
-    }
-  },
-});
-
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-  providers: [emailOtp, Anonymous, password],
+  providers: [emailOtp],
 });

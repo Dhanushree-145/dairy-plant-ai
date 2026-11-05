@@ -31,7 +31,7 @@ const schema = defineSchema(
 
       role: v.optional(roleValidator), // role of the user. do not remove
 
-      // DairyPulse plant-owner profile fields (set during password sign up).
+      // DairySense plant-owner profile fields (set after email OTP sign up).
       phone: v.optional(v.string()),
       plantName: v.optional(v.string()),
     }).index("email", ["email"]), // index for the email. do not remove or modify

@@ -9,11 +9,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/use-auth";
-import { formatRelativeMinutes, initials } from "@/lib/dashboard";
+import { initials } from "@/lib/dashboard";
 import { cn } from "@/lib/utils";
 import {
   BarChart3,
-  Bell,
   Boxes,
   Building2,
   ChevronDown,
@@ -25,7 +24,6 @@ import {
   Recycle,
   ShieldCheck,
   Sparkles,
-  TriangleAlert,
   Wallet,
   X,
   Zap,
@@ -35,25 +33,23 @@ import { useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 
-export type ShellAlert = {
-  id: string;
-  title: string;
-  module: string;
-  severity: "critical" | "warning";
-  minutesAgo: number;
-};
-
 type NavItem = {
   name: string;
   icon: LucideIcon;
   available: boolean;
-  key?: "overview" | "energy";
+  key?: "overview" | "production" | "energy" | "profit" | "reports";
   to?: string;
 };
 
 const NAV_ITEMS: NavItem[] = [
   { name: "Overview", icon: LayoutDashboard, available: true, key: "overview", to: "/dashboard" },
-  { name: "Milk & Production", icon: Milk, available: false },
+  {
+    name: "Milk & Production",
+    icon: Milk,
+    available: true,
+    key: "production",
+    to: "/dashboard/production",
+  },
   {
     name: "Energy & Machines",
     icon: Zap,
@@ -64,27 +60,32 @@ const NAV_ITEMS: NavItem[] = [
   { name: "Hygiene & Quality", icon: ShieldCheck, available: false },
   { name: "Waste Management", icon: Recycle, available: false },
   { name: "Inventory & Maintenance", icon: Boxes, available: false },
-  { name: "Cost & Profit", icon: Wallet, available: false },
-  { name: "Reports & Analytics", icon: BarChart3, available: false },
-  { name: "Alerts & Notifications", icon: Bell, available: false },
+  {
+    name: "Cost & Profit",
+    icon: Wallet,
+    available: true,
+    key: "profit",
+    to: "/dashboard/profit",
+  },
+  {
+    name: "Reports & Analytics",
+    icon: BarChart3,
+    available: true,
+    key: "reports",
+    to: "/dashboard/reports",
+  },
 ];
 
 export function AppShell({
   children,
   plantName,
-  alertCount,
-  alerts,
   sectionLabel = "Overview",
   activeKey = "overview",
-  onViewAlerts,
 }: {
   children: ReactNode;
   plantName?: string;
-  alertCount: number;
-  alerts: ShellAlert[];
   sectionLabel?: string;
-  activeKey?: "overview" | "energy";
-  onViewAlerts?: () => void;
+  activeKey?: "overview" | "production" | "energy" | "profit" | "reports";
 }) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -98,22 +99,10 @@ export function AppShell({
     navigate("/", { replace: true });
   };
 
-  const viewAlerts = () => {
-    setMobileOpen(false);
-    if (onViewAlerts) {
-      onViewAlerts();
-      return;
-    }
-    document.getElementById("pending-alerts")?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  };
-
   const handleLockedModule = (name: string) => {
     setMobileOpen(false);
     toast("Module not in this build", {
-      description: `${name} is not available yet. Overview and Energy & Machines are available now.`,
+      description: `${name} is not available yet. Overview, Milk & Production, Energy, Cost & Profit and Reports are available now.`,
       icon: <Sparkles className="size-4 text-primary" />,
     });
   };
@@ -253,7 +242,7 @@ export function AppShell({
 
   return (
     <div className="min-h-screen bg-background">
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[272px] border-r border-sidebar-border lg:block">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[272px] border-r border-sidebar-border lg:block print:hidden">
         {sidebar}
       </aside>
 
@@ -264,8 +253,8 @@ export function AppShell({
         </SheetContent>
       </Sheet>
 
-      <div className="lg:pl-[272px]">
-        <header className="sticky top-0 z-30 border-b border-border/80 bg-white/85 backdrop-blur-md">
+      <div className="lg:pl-[272px] print:pl-0">
+        <header className="sticky top-0 z-30 border-b border-border/80 bg-white/85 backdrop-blur-md print:hidden">
           <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-8">
             <button
               type="button"
@@ -287,77 +276,6 @@ export function AppShell({
                 <span className="size-1.5 rounded-full bg-warning" />
                 Demo data
               </span>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    className="relative rounded-lg border border-border p-2 text-navy/70 transition-colors hover:bg-muted hover:text-navy"
-                    aria-label={`${alertCount} pending alerts`}
-                  >
-                    <Bell className="size-4" />
-                    {alertCount > 0 && (
-                      <span className="absolute -right-1 -top-1 flex size-[17px] items-center justify-center rounded-full bg-danger text-[9px] font-bold text-white ring-2 ring-white">
-                        {alertCount}
-                      </span>
-                    )}
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[320px] p-0">
-                  <div className="flex items-center justify-between border-b border-border/70 px-3 py-2.5">
-                    <div>
-                      <p className="text-[12px] font-semibold text-navy">Pending alerts</p>
-                      <p className="text-[10px] text-muted-foreground">
-                        From the simulated plant dataset
-                      </p>
-                    </div>
-                    <span className="rounded-full bg-danger/10 px-2 py-0.5 text-[10px] font-semibold text-danger">
-                      {alertCount} open
-                    </span>
-                  </div>
-                  <div className="max-h-[280px] overflow-y-auto p-1">
-                    {alerts.slice(0, 3).map((alert) => (
-                      <DropdownMenuItem
-                        key={alert.id}
-                        onClick={viewAlerts}
-                        className="items-start gap-2.5 px-2.5 py-2"
-                      >
-                        <span
-                          className={cn(
-                            "mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md",
-                            alert.severity === "critical"
-                              ? "bg-danger/10 text-danger"
-                              : "bg-warning/10 text-warning",
-                          )}
-                        >
-                          <TriangleAlert className="size-3.5" />
-                        </span>
-                        <span className="min-w-0">
-                          <span className="block truncate text-[11.5px] font-semibold text-navy">
-                            {alert.title}
-                          </span>
-                          <span className="mt-0.5 block text-[10px] text-muted-foreground">
-                            {alert.module} · {formatRelativeMinutes(alert.minutesAgo)}
-                          </span>
-                        </span>
-                      </DropdownMenuItem>
-                    ))}
-                    {alerts.length === 0 && (
-                      <p className="px-3 py-4 text-center text-[11px] text-muted-foreground">
-                        No open alerts.
-                      </p>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={viewAlerts}
-                    className="flex w-full items-center justify-between border-t border-border/70 px-3 py-2 text-[11px] font-semibold text-primary hover:bg-muted/60"
-                  >
-                    View all pending alerts
-                    <ChevronRight className="size-3.5" />
-                  </button>
-                </DropdownMenuContent>
-              </DropdownMenu>
 
               <div className="hidden h-8 w-px bg-border sm:block" />
 
@@ -392,13 +310,6 @@ export function AppShell({
                     </span>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={viewAlerts}>
-                    <Bell className="size-4" />
-                    Pending alerts
-                    <span className="ml-auto rounded-full bg-danger/10 px-1.5 text-[10px] font-semibold text-danger">
-                      {alertCount}
-                    </span>
-                  </DropdownMenuItem>
                   {user?.plantName && (
                     <DropdownMenuItem disabled>
                       <Building2 className="size-4" />
@@ -421,10 +332,10 @@ export function AppShell({
 
         <main>{children}</main>
 
-        <footer className="border-t border-border/70 px-4 py-5 sm:px-6 lg:px-8">
+        <footer className="border-t border-border/70 px-4 py-5 sm:px-6 lg:px-8 print:hidden">
           <div className="mx-auto flex max-w-[1440px] flex-col gap-2 text-[11px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
             <p>
-              DairyPulse · Overview + Energy & Machines ·{" "}
+              DairySense · Milk, production, energy, cost and profit ·{" "}
               <span className="text-navy/70">Monitor → Detect → Optimize</span>
             </p>
             <p className="flex items-center gap-1.5">

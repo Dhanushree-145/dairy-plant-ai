@@ -1,6 +1,6 @@
 {
-  "name": "DairyPulse — Smart Dairy Plant Intelligence",
-  "short_name": "DairyPulse",
+  "name": "DairySense — Smart Dairy Plant Intelligence",
+  "short_name": "DairySense",
   "description": "Owner's overview for dairy plant production, energy, hygiene and waste.",
   "start_url": "/",
   "display": "standalone",

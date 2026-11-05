@@ -3,8 +3,9 @@ import {
   ArrowDownRight,
   ArrowUpRight,
   Droplets,
+  IndianRupee,
   Sparkles,
-  ThermometerSnowflake,
+  Wallet,
   Zap,
 } from "lucide-react";
 
@@ -27,18 +28,18 @@ const kpis = [
   },
 ];
 
-const alerts = [
+const signals = [
   {
-    icon: ThermometerSnowflake,
-    title: "Cold storage bay 3 at 6.8°C",
-    meta: "Range 2–4°C · 61 min ago",
-    tone: "danger",
+    icon: IndianRupee,
+    title: "Product revenue · ₹4.32 Cr",
+    meta: "+6.2% vs previous period",
+    tone: "success",
   },
   {
-    icon: Zap,
-    title: "Chiller CH-02 above rated load",
-    meta: "+3.4 kW · 22 min ago",
-    tone: "warning",
+    icon: Wallet,
+    title: "Net profit · ₹1.21 Cr",
+    meta: "28.0% margin after all costs",
+    tone: "success",
   },
 ];
 
@@ -176,27 +177,21 @@ export function PreviewPanel() {
         </div>
 
         <div className="mt-3 space-y-1.5">
-          {alerts.map((alert) => {
-            const Icon = alert.icon;
+          {signals.map((signal) => {
+            const Icon = signal.icon;
             return (
               <div
-                key={alert.title}
+                key={signal.title}
                 className="flex items-center gap-2.5 rounded-lg border border-border/60 bg-background/50 px-2.5 py-2"
               >
-                <span
-                  className={
-                    alert.tone === "danger"
-                      ? "flex size-6 shrink-0 items-center justify-center rounded-md bg-danger/10 text-danger"
-                      : "flex size-6 shrink-0 items-center justify-center rounded-md bg-warning/10 text-warning"
-                  }
-                >
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-success/10 text-success-ink">
                   <Icon className="size-3.5" />
                 </span>
                 <div className="min-w-0">
                   <p className="truncate text-[11px] font-semibold text-navy">
-                    {alert.title}
+                    {signal.title}
                   </p>
-                  <p className="text-[9.5px] text-muted-foreground">{alert.meta}</p>
+                  <p className="text-[9.5px] text-muted-foreground">{signal.meta}</p>
                 </div>
               </div>
             );

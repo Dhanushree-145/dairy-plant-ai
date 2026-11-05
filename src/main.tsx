@@ -13,6 +13,9 @@ import "./index.css";
 const Landing = lazy(() => import("./pages/Landing.tsx"));
 const AuthPage = lazy(() => import("./pages/Auth.tsx"));
 const Dashboard = lazy(() => import("./pages/Dashboard.tsx"));
+const Production = lazy(() => import("./pages/Production.tsx"));
+const Profit = lazy(() => import("./pages/Profit.tsx"));
+const Reports = lazy(() => import("./pages/Reports.tsx"));
 const Energy = lazy(() => import("./pages/Energy.tsx"));
 const MachineDetail = lazy(() => import("./pages/MachineDetail.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
@@ -140,6 +143,30 @@ createRoot(document.getElementById("root")!).render(
                 element={
                   <RequireAuth redirectImmediately>
                     <Dashboard />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/dashboard/production"
+                element={
+                  <RequireAuth redirectImmediately>
+                    <Production />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/dashboard/profit"
+                element={
+                  <RequireAuth redirectImmediately>
+                    <Profit />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/dashboard/reports"
+                element={
+                  <RequireAuth redirectImmediately>
+                    <Reports />
                   </RequireAuth>
                 }
               />

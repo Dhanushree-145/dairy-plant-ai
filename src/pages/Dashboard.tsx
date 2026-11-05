@@ -12,11 +12,7 @@ export default function Dashboard() {
   const data = useQuery(api.dashboard.overview, { days });
 
   return (
-    <AppShell
-      plantName={user?.plantName}
-      alertCount={data?.alertSummary.total ?? 0}
-      alerts={data?.alerts ?? []}
-    >
+    <AppShell plantName={user?.plantName}>
       <Overview data={data} days={days} onDaysChange={setDays} />
     </AppShell>
   );

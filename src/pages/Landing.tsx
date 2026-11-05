@@ -3,9 +3,7 @@ import { PreviewPanel } from "@/components/landing/PreviewPanel";
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
-  ArrowUpRight,
   BarChart3,
-  BellRing,
   Boxes,
   CheckCircle2,
   Droplets,
@@ -56,16 +54,12 @@ const stages = [
 ];
 
 const modules = [
-  { name: "Milk & Production", icon: Droplets },
   { name: "Hygiene & Quality", icon: ShieldCheck },
   { name: "Waste Management", icon: Recycle },
   { name: "Inventory & Maintenance", icon: Boxes },
-  { name: "Cost & Profit", icon: Wallet },
-  { name: "Reports & Analytics", icon: BarChart3 },
-  { name: "Alerts & Notifications", icon: BellRing },
 ];
 
-function FeatureVisual({ kind }: { kind: "production" | "energy" | "health" | "alerts" }) {
+function FeatureVisual({ kind }: { kind: "production" | "energy" | "health" | "profit" }) {
   if (kind === "production") {
     const bars = [58, 66, 61, 74, 69, 82, 77];
     return (
@@ -168,26 +162,32 @@ function FeatureVisual({ kind }: { kind: "production" | "energy" | "health" | "a
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-2 rounded-lg border border-danger/15 bg-danger/[0.06] px-2.5 py-2">
-        <span className="size-1.5 shrink-0 rounded-full bg-danger" />
-        <p className="min-w-0 flex-1 truncate text-[10px] font-medium text-navy">
-          Cold storage bay 3 at 6.8°C
-        </p>
-        <span className="text-[9px] font-semibold text-danger">Critical</span>
+      <div className="flex items-center justify-between rounded-lg border border-primary/20 bg-primary/[0.05] px-2.5 py-2">
+        <div>
+          <p className="text-[9px] font-medium uppercase tracking-wider text-muted-foreground">
+            Product revenue
+          </p>
+          <p className="font-display text-[13px] font-semibold text-navy">₹4.32 Cr</p>
+        </div>
+        <span className="text-[9px] font-semibold text-success-ink">+6.2%</span>
       </div>
-      <div className="flex items-center gap-2 rounded-lg border border-warning/20 bg-warning/[0.07] px-2.5 py-2">
-        <span className="size-1.5 shrink-0 rounded-full bg-warning" />
-        <p className="min-w-0 flex-1 truncate text-[10px] font-medium text-navy">
-          CIP cycle overdue on vat CV-04
-        </p>
-        <span className="text-[9px] font-semibold text-warning-ink">Warning</span>
+      <div className="flex items-center justify-between rounded-lg border border-border/70 bg-background/60 px-2.5 py-2">
+        <div>
+          <p className="text-[9px] font-medium uppercase tracking-wider text-muted-foreground">
+            Total cost
+          </p>
+          <p className="font-display text-[13px] font-semibold text-navy">₹3.11 Cr</p>
+        </div>
+        <span className="text-[9px] text-muted-foreground">milk + plant</span>
       </div>
-      <div className="flex items-center gap-2 rounded-lg border border-success/20 bg-success/[0.06] px-2.5 py-2">
-        <Sparkles className="size-3 shrink-0 text-success" />
-        <p className="min-w-0 flex-1 truncate text-[10px] font-medium text-navy">
-          Shift CIP to off-peak · ₹7,400/mo
-        </p>
-        <ArrowUpRight className="size-3 shrink-0 text-success" />
+      <div className="flex items-center justify-between rounded-lg border border-success/25 bg-success/[0.06] px-2.5 py-2">
+        <div>
+          <p className="text-[9px] font-medium uppercase tracking-wider text-success-ink">
+            Net profit
+          </p>
+          <p className="font-display text-[13px] font-semibold text-success-ink">₹1.21 Cr</p>
+        </div>
+        <span className="text-[9px] font-semibold text-success-ink">28.0% margin</span>
       </div>
     </div>
   );
@@ -198,7 +198,7 @@ export default function Landing() {
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-5 sm:px-8">
-          <Link to="/" aria-label="DairyPulse home">
+          <Link to="/" aria-label="DairySense home">
             <Brand />
           </Link>
 
@@ -276,7 +276,7 @@ export default function Landing() {
                 transition={{ duration: 0.6, delay: 0.12 }}
                 className="mt-5 max-w-xl text-[15px] leading-relaxed text-muted-foreground sm:text-base"
               >
-                DairyPulse gives you one owner's view of milk processed, products
+                DairySense gives you one owner's view of milk processed, products
                 made, energy burned and waste generated — then points at the
                 machines, batches and hygiene gaps quietly costing you money.
               </motion.p>
@@ -355,7 +355,7 @@ export default function Landing() {
               A control room, not another register.
             </h2>
             <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
-              Most plant software stops at showing numbers. DairyPulse carries
+              Most plant software stops at showing numbers. DairySense carries
               the same record through three jobs so an owner can act before the
               month closes.
             </p>
@@ -450,10 +450,10 @@ export default function Landing() {
                     copy: "A weighted score across production, energy, hygiene and waste, with the weak pillar exposed.",
                   },
                   {
-                    kind: "alerts" as const,
-                    icon: BellRing,
-                    title: "Pending alerts & actions",
-                    copy: "Critical issues first, each tied to a module, a metric and a recommended next step.",
+                    kind: "profit" as const,
+                    icon: Wallet,
+                    title: "Milk-to-profit economics",
+                    copy: "Milk intake, product revenue, plant costs and net margin reconciled into one owner view.",
                   },
                 ].map((feature, index) => {
                   const Icon = feature.icon;
@@ -492,13 +492,12 @@ export default function Landing() {
                 On the roadmap
               </p>
               <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-navy sm:text-4xl">
-                Two modules shipped. Seven next.
+                Five modules shipped. Three next.
               </h2>
               <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
-                Overview and Energy &amp; Machines are live today: owner KPIs plus
-                machine registration, ON/OFF monitoring, anomaly alerts and energy
-                cost analysis. Every later module builds on the same records and
-                navigation.
+                Overview, Milk &amp; Production, Energy &amp; Machines, Cost &amp; Profit
+                and Reports &amp; Analytics are live today. Every number follows the
+                same milk-to-product record, from intake litres to net margin.
               </p>
             </div>
             <span className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-white px-3 py-1.5 text-[11px] font-medium text-muted-foreground">
@@ -523,7 +522,7 @@ export default function Landing() {
               <div className="mt-6">
                 <p className="text-sm font-semibold text-navy">Overview</p>
                 <p className="mt-1 text-[12px] text-muted-foreground">
-                  KPIs, performance, alerts and recommendations
+                  KPIs, performance and ranked recommendations
                 </p>
               </div>
             </motion.div>
@@ -543,7 +542,67 @@ export default function Landing() {
               <div className="mt-6">
                 <p className="text-sm font-semibold text-navy">Energy &amp; Machines</p>
                 <p className="mt-1 text-[12px] text-muted-foreground">
-                  Machine fleet, live status, costs and anomaly alerts
+                  Machine fleet, live status, energy and costs
+                </p>
+              </div>
+            </motion.div>
+
+            <motion.div
+              {...fadeUp}
+              className="flex flex-col justify-between rounded-2xl border border-primary/25 bg-primary/[0.06] p-5"
+            >
+              <div className="flex items-center justify-between">
+                <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-white">
+                  <LineChart className="size-4" />
+                </span>
+                <span className="rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-semibold text-success-ink">
+                  Shipped
+                </span>
+              </div>
+              <div className="mt-6">
+                <p className="text-sm font-semibold text-navy">Milk &amp; Production</p>
+                <p className="mt-1 text-[12px] text-muted-foreground">
+                  Intake, product output and batch yield
+                </p>
+              </div>
+            </motion.div>
+
+            <motion.div
+              {...fadeUp}
+              className="flex flex-col justify-between rounded-2xl border border-primary/25 bg-primary/[0.06] p-5"
+            >
+              <div className="flex items-center justify-between">
+                <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-white">
+                  <Wallet className="size-4" />
+                </span>
+                <span className="rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-semibold text-success-ink">
+                  Shipped
+                </span>
+              </div>
+              <div className="mt-6">
+                <p className="text-sm font-semibold text-navy">Cost &amp; Profit</p>
+                <p className="mt-1 text-[12px] text-muted-foreground">
+                  Milk, processing, energy and net margin
+                </p>
+              </div>
+            </motion.div>
+
+            <motion.div
+              {...fadeUp}
+              className="flex flex-col justify-between rounded-2xl border border-primary/25 bg-primary/[0.06] p-5"
+            >
+              <div className="flex items-center justify-between">
+                <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-white">
+                  <BarChart3 className="size-4" />
+                </span>
+                <span className="rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-semibold text-success-ink">
+                  Shipped
+                </span>
+              </div>
+              <div className="mt-6">
+                <p className="text-sm font-semibold text-navy">Reports &amp; Analytics</p>
+                <p className="mt-1 text-[12px] text-muted-foreground">
+                  Daily P&amp;L, product margins and exports
                 </p>
               </div>
             </motion.div>
@@ -662,7 +721,7 @@ export default function Landing() {
         </div>
         <div className="border-t border-border/60">
           <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-4 text-[11px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8">
-            <p>© {new Date().getFullYear()} DairyPulse. Hackathon demonstration build.</p>
+            <p>© {new Date().getFullYear()} DairySense. Hackathon demonstration build.</p>
             <p className="flex items-center gap-1.5">
               <span className="size-1.5 rounded-full bg-warning" />
               Dashboard figures are simulated, not real-time readings

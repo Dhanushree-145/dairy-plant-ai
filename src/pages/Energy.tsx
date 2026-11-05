@@ -1,11 +1,10 @@
-import { AlertsTab } from "@/components/energy/AlertsTab";
 import { CostTab } from "@/components/energy/CostTab";
 import { EnergyTab } from "@/components/energy/EnergyTab";
 import { FleetTab } from "@/components/energy/FleetTab";
 import { MachineFormDialog } from "@/components/energy/MachineFormDialog";
 import { MachineSetup } from "@/components/energy/MachineSetup";
 import { OptimizationTab } from "@/components/energy/OptimizationTab";
-import { AppShell, type ShellAlert } from "@/components/dashboard/AppShell";
+import { AppShell } from "@/components/dashboard/AppShell";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,7 +30,6 @@ import {
 import { cn } from "@/lib/utils";
 import { useMutation, useQuery } from "convex/react";
 import {
-  BellRing,
   Boxes,
   CalendarDays,
   CircleAlert,
@@ -51,13 +49,12 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 
-type TabKey = "fleet" | "energy" | "costs" | "alerts" | "optimization";
+type TabKey = "fleet" | "energy" | "costs" | "optimization";
 
 const TABS: { key: TabKey; label: string; icon: LucideIcon }[] = [
   { key: "fleet", label: "Fleet", icon: Boxes },
   { key: "energy", label: "Energy", icon: Zap },
   { key: "costs", label: "Costs", icon: IndianRupee },
-  { key: "alerts", label: "Alerts", icon: BellRing },
   { key: "optimization", label: "AI optimisation", icon: Sparkles },
 ];
 
@@ -107,8 +104,6 @@ export default function Energy() {
     return (
       <AppShell
         plantName={user?.plantName}
-        alertCount={0}
-        alerts={[]}
         sectionLabel="Energy & Machines"
         activeKey="energy"
       >
@@ -121,8 +116,6 @@ export default function Energy() {
     return (
       <AppShell
         plantName={user?.plantName}
-        alertCount={0}
-        alerts={[]}
         sectionLabel="Energy & Machines"
         activeKey="energy"
       >
@@ -135,8 +128,6 @@ export default function Energy() {
     return (
       <AppShell
         plantName={user?.plantName}
-        alertCount={0}
-        alerts={[]}
         sectionLabel="Energy & Machines"
         activeKey="energy"
       >
@@ -144,17 +135,6 @@ export default function Energy() {
       </AppShell>
     );
   }
-
-  const shellAlerts: ShellAlert[] = data.alerts
-    .filter((alert) => alert.status !== "resolved")
-    .slice(0, 3)
-    .map((alert) => ({
-      id: alert.key,
-      title: alert.title,
-      module: `Energy · ${alert.machineCode}`,
-      severity: alert.severity === "critical" ? "critical" : "warning",
-      minutesAgo: Math.max(1, Math.round((now - alert.detectedAt) / 60_000)),
-    }));
 
   const kpis: {
     label: string;
@@ -215,26 +195,13 @@ export default function Energy() {
       icon: Gauge,
       tone: "bg-primary/10 text-primary",
     },
-    {
-      label: "Active alerts",
-      value: numberFormatter.format(data.alertSummary.active),
-      caption: `${data.alertSummary.critical} critical · ${data.alertSummary.acknowledged} acknowledged`,
-      icon: BellRing,
-      tone: "bg-danger/10 text-danger",
-    },
   ];
 
   return (
     <AppShell
       plantName={user?.plantName}
-      alertCount={data.alertSummary.active}
-      alerts={shellAlerts}
       sectionLabel="Energy & Machines"
       activeKey="energy"
-      onViewAlerts={() => {
-        setTab("alerts");
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }}
     >
       <div className="mx-auto max-w-[1440px] space-y-5 px-4 pb-10 pt-6 sm:px-6 lg:px-8 lg:pt-8">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
@@ -247,7 +214,7 @@ export default function Energy() {
             </h1>
             <p className="mt-1 max-w-2xl text-[13px] leading-relaxed text-muted-foreground">
               {data.summary.registered} registered machines from reception to cold
-              storage. Status, consumption and alerts are generated demo telemetry at{" "}
+              storage. Status and consumption are generated demo telemetry at{" "}
               <span className="font-medium text-navy/80">
                 ₹{data.tariff.toFixed(2)}/kWh
               </span>
@@ -292,7 +259,7 @@ export default function Energy() {
             <Info className="mt-0.5 size-4 shrink-0 text-warning" />
             <p className="text-[11.5px] leading-relaxed text-navy/75">
               <span className="font-semibold text-navy">Simulated telemetry.</span>{" "}
-              Machine ON/OFF state, meter readings, temperatures and alerts are
+              Machine ON/OFF state, meter readings and temperatures are
               generated demo data, not live IoT or manual readings. Machines without a
               reading show fault/unknown instead of OFF.
             </p>
@@ -349,12 +316,7 @@ export default function Energy() {
           {TABS.map((item) => {
             const Icon = item.icon;
             const active = tab === item.key;
-            const badge =
-              item.key === "fleet"
-                ? data.summary.registered
-                : item.key === "alerts"
-                  ? data.alertSummary.active
-                  : null;
+            const badge = item.key === "fleet" ? data.summary.registered : null;
             return (
               <button
                 key={item.key}
@@ -372,14 +334,7 @@ export default function Energy() {
                 <Icon className="size-3.5" />
                 {item.label}
                 {badge !== null && badge > 0 && (
-                  <span
-                    className={cn(
-                      "rounded-full px-1 text-[9px] font-bold",
-                      item.key === "alerts"
-                        ? "bg-danger/10 text-danger"
-                        : "bg-muted text-muted-foreground",
-                    )}
-                  >
+                  <span className="rounded-full bg-muted px-1 text-[9px] font-bold text-muted-foreground">
                     {badge}
                   </span>
                 )}
@@ -408,7 +363,6 @@ export default function Energy() {
             />
           )}
           {tab === "costs" && <CostTab data={data} />}
-          {tab === "alerts" && <AlertsTab alerts={data.alerts} now={now} />}
           {tab === "optimization" && <OptimizationTab data={data} />}
         </div>
 

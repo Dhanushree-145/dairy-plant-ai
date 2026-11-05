@@ -208,7 +208,7 @@ export function MachineSetup() {
           </h1>
           <p className="mt-1 max-w-2xl text-[13px] leading-relaxed text-muted-foreground">
             Add the machines at{" "}
-            <span className="font-medium text-navy/80">{plant}</span> once. DairyPulse
+            <span className="font-medium text-navy/80">{plant}</span> once. DairySense
             then tracks each unit from reception through cold storage. This setup does
             not appear again after registration.
           </p>

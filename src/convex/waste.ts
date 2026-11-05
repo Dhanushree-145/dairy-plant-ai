@@ -98,6 +98,7 @@ type ConfigShape = {
     rejectedKg: number;
   };
   responsible: string[];
+  collectionSchedule: string;
   storageLocations: Array<{ name: string; capacity: number; unit: string }>;
   disposalMethods: string[];
   recoveryMethods: string[];
@@ -794,6 +795,7 @@ export const configure = mutation({
       stages: args.stages,
       thresholds: args.thresholds,
       responsible: args.responsible,
+      collectionSchedule: args.collectionSchedule,
       storageLocations: args.storageLocations,
       disposalMethods: args.disposalMethods,
       recoveryMethods: args.recoveryMethods,
