@@ -9,11 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/use-auth";
-import {
-  formatRelativeMinutes,
-  initials,
-  type OverviewAlert,
-} from "@/lib/dashboard";
+import { formatRelativeMinutes, initials } from "@/lib/dashboard";
 import { cn } from "@/lib/utils";
 import {
   BarChart3,
@@ -33,15 +29,38 @@ import {
   Wallet,
   X,
   Zap,
+  type LucideIcon,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 
-const NAV_ITEMS = [
-  { name: "Overview", icon: LayoutDashboard, available: true },
+export type ShellAlert = {
+  id: string;
+  title: string;
+  module: string;
+  severity: "critical" | "warning";
+  minutesAgo: number;
+};
+
+type NavItem = {
+  name: string;
+  icon: LucideIcon;
+  available: boolean;
+  key?: "overview" | "energy";
+  to?: string;
+};
+
+const NAV_ITEMS: NavItem[] = [
+  { name: "Overview", icon: LayoutDashboard, available: true, key: "overview", to: "/dashboard" },
   { name: "Milk & Production", icon: Milk, available: false },
-  { name: "Energy & Machines", icon: Zap, available: false },
+  {
+    name: "Energy & Machines",
+    icon: Zap,
+    available: true,
+    key: "energy",
+    to: "/dashboard/energy",
+  },
   { name: "Hygiene & Quality", icon: ShieldCheck, available: false },
   { name: "Waste Management", icon: Recycle, available: false },
   { name: "Inventory & Maintenance", icon: Boxes, available: false },
@@ -55,11 +74,17 @@ export function AppShell({
   plantName,
   alertCount,
   alerts,
+  sectionLabel = "Overview",
+  activeKey = "overview",
+  onViewAlerts,
 }: {
   children: ReactNode;
   plantName?: string;
   alertCount: number;
-  alerts: OverviewAlert[];
+  alerts: ShellAlert[];
+  sectionLabel?: string;
+  activeKey?: "overview" | "energy";
+  onViewAlerts?: () => void;
 }) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -73,8 +98,12 @@ export function AppShell({
     navigate("/", { replace: true });
   };
 
-  const scrollToAlerts = () => {
+  const viewAlerts = () => {
     setMobileOpen(false);
+    if (onViewAlerts) {
+      onViewAlerts();
+      return;
+    }
     document.getElementById("pending-alerts")?.scrollIntoView({
       behavior: "smooth",
       block: "start",
@@ -83,8 +112,8 @@ export function AppShell({
 
   const handleLockedModule = (name: string) => {
     setMobileOpen(false);
-    toast("Module scheduled for v2", {
-      description: `${name} arrives after the Overview dashboard. Version 1 focuses on the owner's overview.`,
+    toast("Module not in this build", {
+      description: `${name} is scheduled after the live Overview and Energy & Machines modules.`,
       icon: <Sparkles className="size-4 text-primary" />,
     });
   };
@@ -141,22 +170,41 @@ export function AppShell({
                 </li>
               );
             }
+
+            const active = item.key === activeKey;
             return (
               <li key={item.name}>
-                <a
-                  href="#overview"
-                  aria-current="page"
-                  onClick={() => {
-                    setMobileOpen(false);
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                  }}
-                  className="relative flex items-center gap-2.5 rounded-lg bg-white/[0.09] px-2.5 py-2 text-[12.5px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
+                <Link
+                  to={item.to ?? "/dashboard"}
+                  aria-current={active ? "page" : undefined}
+                  onClick={() => setMobileOpen(false)}
+                  className={cn(
+                    "relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12.5px] font-medium transition-colors",
+                    active
+                      ? "bg-white/[0.09] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
+                      : "text-sidebar-foreground/70 hover:bg-white/[0.06] hover:text-white/90",
+                  )}
                 >
-                  <span className="absolute inset-y-1.5 left-0 w-[3px] rounded-full bg-primary" />
-                  <Icon className="size-4 shrink-0 text-primary" />
+                  {active && (
+                    <span className="absolute inset-y-1.5 left-0 w-[3px] rounded-full bg-primary" />
+                  )}
+                  <Icon
+                    className={cn(
+                      "size-4 shrink-0",
+                      active ? "text-primary" : "text-sidebar-foreground/45",
+                    )}
+                  />
                   <span className="min-w-0 flex-1 truncate">{item.name}</span>
-                  <ChevronRight className="size-3.5 text-white/40" />
-                </a>
+                  {active ? (
+                    <ChevronRight className="size-3.5 text-white/40" />
+                  ) : (
+                    item.key === "energy" && (
+                      <span className="rounded border border-primary/30 bg-primary/10 px-1 py-0.5 text-[8px] font-semibold uppercase tracking-wider text-primary">
+                        Live
+                      </span>
+                    )
+                  )}
+                </Link>
               </li>
             );
           })}
@@ -164,12 +212,13 @@ export function AppShell({
       </nav>
 
       <div className="shrink-0 space-y-3 border-t border-sidebar-border p-3">
-        <div className="rounded-xl border border-warning/20 bg-warning/[0.08] p-3">            <p className="flex items-center gap-1.5 text-[10.5px] font-semibold text-warning">
-              <span className="size-1.5 rounded-full bg-warning" />
-              Simulated dataset
+        <div className="rounded-xl border border-warning/20 bg-warning/[0.08] p-3">
+          <p className="flex items-center gap-1.5 text-[10.5px] font-semibold text-warning">
+            <span className="size-1.5 rounded-full bg-warning" />
+            Simulated dataset
           </p>
           <p className="mt-1 text-[10.5px] leading-relaxed text-sidebar-foreground/55">
-            Demo plant records for the hackathon build. No live sensors.
+            Demo plant and machine records. No live sensors are connected.
           </p>
         </div>
 
@@ -225,7 +274,7 @@ export function AppShell({
             <div className="flex min-w-0 items-center gap-2 text-[12px]">
               <span className="hidden text-muted-foreground sm:inline">Workspace</span>
               <ChevronRight className="hidden size-3 text-muted-foreground/50 sm:inline" />
-              <span className="truncate font-semibold text-navy">Overview</span>
+              <span className="truncate font-semibold text-navy">{sectionLabel}</span>
             </div>
 
             <div className="ml-auto flex items-center gap-2 sm:gap-3">
@@ -265,7 +314,7 @@ export function AppShell({
                     {alerts.slice(0, 3).map((alert) => (
                       <DropdownMenuItem
                         key={alert.id}
-                        onClick={scrollToAlerts}
+                        onClick={viewAlerts}
                         className="items-start gap-2.5 px-2.5 py-2"
                       >
                         <span
@@ -288,10 +337,15 @@ export function AppShell({
                         </span>
                       </DropdownMenuItem>
                     ))}
+                    {alerts.length === 0 && (
+                      <p className="px-3 py-4 text-center text-[11px] text-muted-foreground">
+                        No open alerts.
+                      </p>
+                    )}
                   </div>
                   <button
                     type="button"
-                    onClick={scrollToAlerts}
+                    onClick={viewAlerts}
                     className="flex w-full items-center justify-between border-t border-border/70 px-3 py-2 text-[11px] font-semibold text-primary hover:bg-muted/60"
                   >
                     View all pending alerts
@@ -333,7 +387,7 @@ export function AppShell({
                     </span>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={scrollToAlerts}>
+                  <DropdownMenuItem onSelect={viewAlerts}>
                     <Bell className="size-4" />
                     Pending alerts
                     <span className="ml-auto rounded-full bg-danger/10 px-1.5 text-[10px] font-semibold text-danger">
@@ -365,7 +419,7 @@ export function AppShell({
         <footer className="border-t border-border/70 px-4 py-5 sm:px-6 lg:px-8">
           <div className="mx-auto flex max-w-[1440px] flex-col gap-2 text-[11px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
             <p>
-              DairyPulse · Version 1 overview ·{" "}
+              DairyPulse · Overview + Energy & Machines ·{" "}
               <span className="text-navy/70">Monitor → Detect → Optimize</span>
             </p>
             <p className="flex items-center gap-1.5">
@@ -378,4 +432,3 @@ export function AppShell({
     </div>
   );
 }
-

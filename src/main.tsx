@@ -13,6 +13,8 @@ import "./index.css";
 const Landing = lazy(() => import("./pages/Landing.tsx"));
 const AuthPage = lazy(() => import("./pages/Auth.tsx"));
 const Dashboard = lazy(() => import("./pages/Dashboard.tsx"));
+const Energy = lazy(() => import("./pages/Energy.tsx"));
+const MachineDetail = lazy(() => import("./pages/MachineDetail.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
 // Simple loading fallback for route transitions
@@ -138,6 +140,22 @@ createRoot(document.getElementById("root")!).render(
                 element={
                   <RequireAuth redirectImmediately>
                     <Dashboard />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/dashboard/energy"
+                element={
+                  <RequireAuth redirectImmediately>
+                    <Energy />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/dashboard/energy/machines/:machineId"
+                element={
+                  <RequireAuth redirectImmediately>
+                    <MachineDetail />
                   </RequireAuth>
                 }
               />

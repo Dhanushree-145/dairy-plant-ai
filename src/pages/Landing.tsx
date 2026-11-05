@@ -57,7 +57,6 @@ const stages = [
 
 const modules = [
   { name: "Milk & Production", icon: Droplets },
-  { name: "Energy & Machines", icon: Zap },
   { name: "Hygiene & Quality", icon: ShieldCheck },
   { name: "Waste Management", icon: Recycle },
   { name: "Inventory & Maintenance", icon: Boxes },
@@ -413,7 +412,7 @@ export default function Landing() {
               <motion.div {...fadeUp} className="lg:sticky lg:top-24">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">
                   <HeartPulse className="size-3.5" />
-                  Version 1 · Overview
+                  Live modules · Overview + Energy
                 </span>
                 <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-navy sm:text-4xl">
                   The morning screen for the person who owns the numbers.
@@ -493,17 +492,18 @@ export default function Landing() {
                 On the roadmap
               </p>
               <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-navy sm:text-4xl">
-                One overview now. Eight modules next.
+                Two modules live. Seven next.
               </h2>
               <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
-                Version 1 deliberately ships the Overview dashboard for plant
-                owners. Every later module builds on the same records and the
-                same navigation you can already see in the sidebar.
+                Overview and Energy &amp; Machines are live today: owner KPIs plus
+                machine registration, ON/OFF monitoring, anomaly alerts and energy
+                cost analysis. Every later module builds on the same records and
+                navigation.
               </p>
             </div>
             <span className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-white px-3 py-1.5 text-[11px] font-medium text-muted-foreground">
               <span className="size-1.5 rounded-full bg-primary" />
-              Shipped in v1
+              Live in this build
             </span>
           </motion.div>
 
@@ -524,6 +524,26 @@ export default function Landing() {
                 <p className="text-sm font-semibold text-navy">Overview</p>
                 <p className="mt-1 text-[12px] text-muted-foreground">
                   KPIs, performance, alerts and recommendations
+                </p>
+              </div>
+            </motion.div>
+
+            <motion.div
+              {...fadeUp}
+              className="flex flex-col justify-between rounded-2xl border border-primary/25 bg-primary/[0.06] p-5"
+            >
+              <div className="flex items-center justify-between">
+                <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-white">
+                  <Zap className="size-4" />
+                </span>
+                <span className="rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-semibold text-success-ink">
+                  Live
+                </span>
+              </div>
+              <div className="mt-6">
+                <p className="text-sm font-semibold text-navy">Energy &amp; Machines</p>
+                <p className="mt-1 text-[12px] text-muted-foreground">
+                  Machine fleet, live status, costs and anomaly alerts
                 </p>
               </div>
             </motion.div>
