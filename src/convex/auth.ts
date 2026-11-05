@@ -4,10 +4,10 @@ import { convexAuth } from "@convex-dev/auth/server";
 import { emailOtp } from "./auth/emailOtp";
 
 /**
- * DairySense uses passwordless email one-time codes. The same flow works for
- * Gmail addresses and plant domains: the gateway emails a 6-digit code, and
- * Convex Auth creates the account on first successful verification. Profile
- * fields collected at sign-up are saved after verification by profile.ts.
+ * Dairy360 uses passwordless email one-time codes. The same flow works for
+ * Gmail addresses and plant domains: the gateway emails a 6-digit code only
+ * when the email already has an account; unknown emails are rejected before an
+ * OTP is sent.
  */
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [emailOtp],
