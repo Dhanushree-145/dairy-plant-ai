@@ -37,7 +37,7 @@ const emailSchema = z.object({
     .string()
     .trim()
     .min(1, "Enter your email address")
-    .email("Enter a valid email address, such as name@gmail.com"),
+    .email("Enter a valid email id, such as name@gmail.com"),
 });
 type EmailValues = z.infer<typeof emailSchema>;
 
@@ -47,7 +47,7 @@ const signUpSchema = z.object({
     .string()
     .trim()
     .min(1, "Enter your email address")
-    .email("Enter a valid email address, such as name@gmail.com"),
+    .email("Enter a valid email id, such as name@gmail.com"),
   phone: z
     .string()
     .trim()
@@ -87,10 +87,10 @@ function friendlyAuthError(error: unknown): string {
     return "That code is not valid or has expired. Request a new one.";
   }
   if (/invalid email/i.test(raw)) {
-    return "Enter a valid email address.";
+    return "Enter a valid email id.";
   }
   if (/user not found|no such account|account not found/i.test(raw)) {
-    return "That email address was not used to create an account. Please use a different email.";
+    return "Enter a valid email id.";
   }
   if (/VLY_INTEGRATION|Could not send|sign-in code/i.test(raw)) {
     return "We could not send the code right now. Try again in a moment.";
@@ -514,9 +514,8 @@ function AuthScreen({
                   <div className="flex items-start gap-2 rounded-lg border border-primary/15 bg-primary/[0.04] px-3 py-2.5">
                     <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />
                     <p className="text-[11px] leading-relaxed text-navy/70">
-                      We email a 6-digit code to verify the address. If we do not have an
-                      account for this email, requesting the code will fail with "enter a valid
-                      email id".
+                      An email address that has not been used to create an account will be
+                      treated as invalid and show "Enter a valid email id".
                     </p>
                   </div>
 
