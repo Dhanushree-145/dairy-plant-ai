@@ -178,7 +178,7 @@ function AuthScreen({
     setFormError(null);
     try {
       const normalized = email.trim().toLowerCase();
-      await signIn("email-otp", { email: normalized });
+      await signIn("email-otp", { email: normalized, existingUserRequired: true });
       setPendingEmail(normalized);
       setPendingProfile(profile);
       setCode("");
