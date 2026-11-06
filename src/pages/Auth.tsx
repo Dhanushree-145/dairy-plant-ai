@@ -31,6 +31,7 @@ import { useMutation } from "convex/react";
 import { z } from "zod";
 
 const REMEMBERED_EMAIL_KEY = "dairy360:remembered-email";
+const PENDING_CODE_EMAIL_KEY = "dairy360:pending-code-email";
 
 const emailSchema = z.object({
   email: z
@@ -71,6 +72,28 @@ function readRememberedEmail(): string {
   }
 }
 
+/** The code step is kept in session storage so a reload or a network blip does
+ *  not throw the user back to the details form and lose the code they were sent. */
+function readPendingCodeEmail(): string {
+  try {
+    return window.sessionStorage.getItem(PENDING_CODE_EMAIL_KEY) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function storePendingCodeEmail(email: string | null) {
+  try {
+    if (email) {
+      window.sessionStorage.setItem(PENDING_CODE_EMAIL_KEY, email);
+    } else {
+      window.sessionStorage.removeItem(PENDING_CODE_EMAIL_KEY);
+    }
+  } catch {
+    // A blocked storage API must not block sign-in.
+  }
+}
+
 function resolveRedirectAfterAuth(returnTo: string | null, fallback = "/dashboard") {
   if (returnTo?.startsWith("/") && !returnTo.startsWith("//")) {
     return returnTo;
@@ -94,6 +117,9 @@ function friendlyAuthError(error: unknown): string {
   }
   if (/VLY_INTEGRATION|Could not send|sign-in code/i.test(raw)) {
     return "We could not send the code right now. Try again in a moment.";
+  }
+  if (/failed to fetch|networkerror|network request failed|load failed/i.test(raw)) {
+    return "We could not reach the server. Check your connection and try again.";
   }
   return raw || "We could not complete sign-in. Please try again.";
 }
@@ -145,8 +171,10 @@ function AuthScreen({
     defaultValues: { name: "", email: rememberedEmail, phone: "", plantName: "" },
   });
 
-  const [step, setStep] = useState<"details" | "code">("details");
-  const [pendingEmail, setPendingEmail] = useState("");
+  const [pendingEmail, setPendingEmail] = useState(readPendingCodeEmail);
+  const [step, setStep] = useState<"details" | "code">(
+    pendingEmail ? "code" : "details",
+  );
   const [pendingProfile, setPendingProfile] = useState<SignUpProfile | null>(null);
   const [code, setCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -154,10 +182,15 @@ function AuthScreen({
   const [resendIn, setResendIn] = useState(0);
 
   useEffect(() => {
-    if (!authLoading && isAuthenticated && step === "details") {
+    if (authLoading || !isAuthenticated) return;
+    // A restored session should not be held on the auth screen. While a code is
+    // being verified the explicit redirect in `verifyCode` finishes the flow, so
+    // the profile save is not cut short here.
+    if (step === "details" || (!isSubmitting && !pendingProfile)) {
+      storePendingCodeEmail(null);
       navigate(redirect, { replace: true });
     }
-  }, [authLoading, isAuthenticated, navigate, redirect, step]);
+  }, [authLoading, isAuthenticated, isSubmitting, navigate, pendingProfile, redirect, step]);
 
   useEffect(() => {
     if (resendIn <= 0) return;
@@ -185,6 +218,7 @@ function AuthScreen({
       setStep("code");
       setResendIn(45);
       rememberEmail(normalized);
+      storePendingCodeEmail(normalized);
     } catch (error) {
       setFormError(friendlyAuthError(error));
     } finally {
@@ -225,10 +259,12 @@ function AuthScreen({
     if (code.length !== 6 || isSubmitting) return;
     setIsSubmitting(true);
     setFormError(null);
-    try {        await signIn("email-otp", { email: pendingEmail, code });
-        await saveProfileIfNeeded();
-        rememberEmail(pendingEmail);
-        navigate(redirect, { replace: true });
+    try {
+      await signIn("email-otp", { email: pendingEmail, code });
+      await saveProfileIfNeeded();
+      rememberEmail(pendingEmail);
+      storePendingCodeEmail(null);
+      navigate(redirect, { replace: true });
     } catch (error) {
       setFormError(friendlyAuthError(error));
       setCode("");
@@ -418,6 +454,7 @@ function AuthScreen({
                         setStep("details");
                         setFormError(null);
                         setCode("");
+                        storePendingCodeEmail(null);
                       }}
                       className="inline-flex items-center gap-1 text-[11.5px] font-medium text-muted-foreground hover:text-primary"
                       disabled={isSubmitting}
