@@ -274,9 +274,8 @@ export default function Landing() {
                 transition={{ duration: 0.6, delay: 0.12 }}
                 className="mt-5 max-w-xl text-[15px] leading-relaxed text-muted-foreground sm:text-base"
               >
-                Dairy360 gives you one owner's view of milk processed, products
-                made, energy burned and waste generated — then points at the
-                machines, batches and hygiene gaps quietly costing you money.
+                One owner's view of milk, products, energy and waste — and what
+                each one quietly costs you.
               </motion.p>
 
               <motion.div
@@ -352,7 +351,8 @@ export default function Landing() {
             <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-navy sm:text-4xl">
               A control room, not another register.
             </h2>
-            <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">Most plant software stops at showing numbers. Dairy360 carries the same record through three jobs so an owner can act before the month closes.
+            <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
+              Three jobs on one record, so you can act before the month closes.
             </p>
           </motion.div>
 
@@ -413,9 +413,7 @@ export default function Landing() {
                   The morning screen for the person who owns the numbers.
                 </h2>
                 <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
-                  Four questions, answered in one scroll: what did we process,
-                  what did it cost in energy, how much did we lose, and what
-                  needs a decision today?
+                  What we processed, what it cost, what we lost, what needs a decision.
                 </p>
                 <div className="mt-7 rounded-xl border border-border bg-background/60 p-4 text-[12px] leading-relaxed text-muted-foreground">
                   <span className="font-semibold text-navy">Honest by design.</span>{" "}
@@ -490,9 +488,7 @@ export default function Landing() {
                 Five modules shipped. Two next.
               </h2>
               <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
-                Overview, Milk &amp; Production, Energy &amp; Machines, Cost &amp; Profit
-                and Reports &amp; Analytics are live today. Every number follows the
-                same milk-to-product record, from intake litres to net margin.
+                Five modules live, all reading the same milk-to-product record.
               </p>
             </div>
             <span className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-white px-3 py-1.5 text-[11px] font-medium text-muted-foreground">
@@ -647,9 +643,7 @@ export default function Landing() {
                   One screen. Every litre accounted for.
                 </h2>
                 <p className="mt-3 text-sm leading-relaxed text-white/65">
-                  Create a plant account, open the overview and see where the
-                  simulated plant is losing money — then decide what to fix
-                  first.
+                  Create a plant account and see where the demo plant loses money.
                 </p>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row">
